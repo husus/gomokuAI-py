@@ -1,6 +1,7 @@
 from board import *
 from evaluation import *
 
+
 class GomokuAI():
     def __init__(self, depth):
         self.depth = depth   
@@ -203,7 +204,7 @@ class GomokuAI():
 
     def ab_pruning(self, depth, board_value, bound, alpha, beta, maximizingPlayer):
         if depth <= 0 or (self.check_result() != None): #or end game
-            print(board_value)
+            # print('board value: ',board_value)
             return  board_value #value of current position
         # the maximizing player is AI
         if maximizingPlayer:
@@ -213,26 +214,27 @@ class GomokuAI():
             for child in child_nodes(bound):
                 # child SHOULD be in format of (i,j) or (row, col)
                 i, j = child[0], child[1]
-                print(child)
+                # print('max child: ',child)
                 # create a new bound with updated values
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
-                print('new_bound: ',new_bound)
+                # print('new_bound: ',new_bound)
 
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
-                print('new_val: ',new_val)
-                self.boardMap[i][j] = 1 #AI
+                # print('new_val: ',new_val)
+
+                # self.boardMap[i][j] = 1 #AI
                 # update bound based on the new move (i,j)
                 self.update_bound(i, j, new_bound) 
-                print('bound updated max: ',new_bound)
-                print('depth max: ', depth)
+                # print('bound updated max: ',new_bound)
+                # print('depth max: ', depth)
 
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, False)
-                print('ab value: ', eval)
-                print('max_val before: ', max_val)
+                # print('ab value: ', eval)
+                # print('print new val: ', new_val)
                 max_val = max(max_val, eval)
-                print('max_val after: ', max_val)
+                # print('max_val after: ', max_val)
                 
                 if depth == self.depth:
                     self.nextI = i
@@ -240,8 +242,9 @@ class GomokuAI():
                     self.nextValue = new_val
                     self.nextBound = new_bound
                 alpha = max(alpha, eval)
-                print('new alpha is: ', alpha)
-                self.boardMap[i][j] = 0
+                # print('new alpha is: ', alpha)
+                # self.boardMap[i][j] = 0
+                self.set_pos_state(i,j,0) #undoing the move
 
                 # del new_bound
                 if beta <= alpha:
@@ -256,35 +259,34 @@ class GomokuAI():
             # look through the child nodes using function in board.py
             for child in child_nodes(bound):
                 i, j = child[0], child[1]
-                print('min: ', child)
+                # print('min child: ', child)
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
-                self.boardMap[i][j] = -1 #human
+                self.set_pos_state(i,j,-1) #human
+                # self.boardMap[i][j] = -1 #human
                 self.update_bound(i, j, new_bound)
-                print('updated new_bound min: ', new_bound)
-                print('depth min: ', depth)
-                print('aaa', new_val)
-                eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)  
+                # print('updated new_bound min: ', new_bound)
+                # print('depth min: ', depth)
+                # print('aaa', new_val)
+                eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)
                 print(eval)
-                print('bbb', new_val)                                                                                                           (child, depth-1, alpha, beta, True)
-                print('minim eval: ', eval)
+                # print('bbb', new_val)
+                # print('minim eval: ', eval)
                 min_val = min(min_val, eval)
-                print('min val :' ,min_val)
+                # print('min val :' ,min_val)
                 if depth == self.depth:
                     self.nextI = i 
                     self.nextJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
                     
+                    
                 beta = min(beta, eval)
-                self.boardMap[i][j] = 0
+                self.set_pos_state(i,j,0) #undoing the move
 
-                del new_bound
+                # del new_bound
                 if beta <= alpha:
                     break
-
-                
-
             return min_val
 
     def check_result(self):
