@@ -10,7 +10,7 @@ class Game:
                               ['.','.','.'],
                               ['.','.','.']]
 
-        # Player 0 always plays first
+        # Player 08 always plays first
         self.player_turn = '0'
 
     def draw_board(self):
