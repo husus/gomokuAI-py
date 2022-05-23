@@ -31,6 +31,34 @@ def child_nodes(bound):
     for pos in sorted(bound.items(), key=lambda el: el[1], reverse=True):
         yield get_position(pos[0], N)
 
+# Draw the board
+def draw_board(board):
+    '''
+    board = a list of lists sotoring the moves made 
+    -------
+    States:
+    0 = empty (.)
+    1 = AI (x)
+    -1 = human (o)
+    '''
+    for i in range(N):
+        for j in range(N):
+            if board[i][j] == 1:
+                state = 'x'
+            if board[i][j] == -1:
+                state = 'o'
+            if board[i][j] == 0:
+                state = '.'
+            print('{}|'.format(state), end=" ")
+        print()
+    print() 
+
+# Set board position state
+def set_state(board, i, j, state):
+    assert state in (-1,0,1), 'The state inserted is not -1, 0 or 1'
+    board[i][j] = state
+
+
 # To check whether a position (i, j) is valid, i.e. whether it's inside the board
 # and whether it's an empty position
 # def is_valid(i, j):

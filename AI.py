@@ -7,12 +7,11 @@ class GomokuAI():
         self.depth = depth   
         # self.boardMap = [[BoardState.EMPTY.name for j in range(N)] for i in range(N)]
         self.boardMap = [[0 for j in range(N)] for i in range(N)]
-        self.nextI = -1
-        self.nextJ = -1
-        # self.currentState = BoardState.EMPTY.name
+        self.currentI = -1
+        self.currentJ = -1
         self.currentState = 0
         self.nextValue = 0 # board value
-        self.nextBound = None
+        self.nextBound = {}
 
     def get_board_map(self):
         return self.boardMap
@@ -37,7 +36,6 @@ class GomokuAI():
         print() 
 
     def get_state(self, i, j):
-        self.__nextJ = 2
         return self.boardMap[i][j]
     
     def is_valid(self, i, j, state=True):
@@ -103,14 +101,15 @@ class GomokuAI():
         # check to add new position
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, 1), (1, -1), (-1, -1), (1, 1)]
         # check at 2 more steps on a certain direction
-        for i in range(1,3):
-            for dir in directions:
-                new_col = new_j + i*dir[0]
-                new_row = new_i + i*dir[1]
-                if self.is_valid(new_row, new_col):
-                    num = get_number(new_row, new_col, N)
-                    if num not in bound:  # if not previously been updated in def evaluation
-                        bound[num] = 1
+        # for i in range(1,3):
+        for dir in directions:
+            new_col = new_j + dir[0]
+            new_row = new_i + dir[1]
+            if self.is_valid(new_row, new_col):
+                num = get_number(new_row, new_col, N)
+                if num not in bound:  # if not previously been updated in def evaluation
+                    bound[num] = 1
+        return bound
     
     # this counting method takes in x,y position and check the presence of the pattern   
     # and how many there are around that position (horizontally, vertically and diagonally)
@@ -155,17 +154,20 @@ class GomokuAI():
                         and self.boardMap[i_new][j_new] == pattern[index]: 
                     # first check if it's the empty position to store
                     # score is also a flag indicating whether modifying the bound
-                    if self.boardMap[i_new][j_new] == 0:
+                    # if self.boardMap[i_new][j_new] == 0:
+                    if self.is_valid(i_new, j_new) == 0:
                         remember.append(get_number(i_new, j_new, N)) #transforming to ordinal number
                     # go through every square
                     i_new = i_new + dir[1]
                     j_new = j_new + dir[0]
                     
                     index += 1
+
                 # if we found one pattern
                 if index == length:
                     count += 1
                     for pos in remember:
+
                         # check whether pos is already present in bound dict
                         if pos not in bound:
                             bound[pos] = 0
@@ -212,9 +214,8 @@ class GomokuAI():
             max_val = float("-inf")
             # look through the child nodes using function in board.py
             for child in child_nodes(bound):
-                # child SHOULD be in format of (i,j) or (row, col)
+                # child HAVE to be in format of (i,j) or (row, col)
                 i, j = child[0], child[1]
-                # print('max child: ',child)
                 # create a new bound with updated values
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
@@ -224,11 +225,13 @@ class GomokuAI():
                 # print('new_val: ',new_val)
 
                 # self.boardMap[i][j] = 1 #AI
+                self.set_pos_state(i,j,1)
                 # update bound based on the new move (i,j)
-                self.update_bound(i, j, new_bound) 
+                new_bound = self.update_bound(i, j, new_bound) 
                 # print('bound updated max: ',new_bound)
                 # print('depth max: ', depth)
 
+                # print('depth: ', depth)
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, False)
                 # print('ab value: ', eval)
@@ -236,21 +239,21 @@ class GomokuAI():
                 max_val = max(max_val, eval)
                 # print('max_val after: ', max_val)
                 
-                if depth == self.depth:
-                    self.nextI = i
-                    self.nextJ = j
+                if depth == self.depth: # and self.is_valid(i,j):
+                    # print('depth==self.depth --> ',i,j, 'depth: ', depth)
+                    self.currentI = i
+                    self.currentJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
                 alpha = max(alpha, eval)
-                # print('new alpha is: ', alpha)
+                # print('i,j before undoing: ',i,j)
                 # self.boardMap[i][j] = 0
                 self.set_pos_state(i,j,0) #undoing the move
 
                 # del new_bound
+                del new_bound
                 if beta <= alpha:
                     break
-
-                
             return max_val
 
         else:
@@ -264,33 +267,34 @@ class GomokuAI():
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
                 self.set_pos_state(i,j,-1) #human
                 # self.boardMap[i][j] = -1 #human
-                self.update_bound(i, j, new_bound)
-                # print('updated new_bound min: ', new_bound)
-                # print('depth min: ', depth)
-                # print('aaa', new_val)
+                new_bound = self.update_bound(i, j, new_bound)
+
+                # print('depth: ', depth)
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)
-                print(eval)
+                # print(eval)
                 # print('bbb', new_val)
                 # print('minim eval: ', eval)
                 min_val = min(min_val, eval)
-                # print('min val :' ,min_val)
-                if depth == self.depth:
-                    self.nextI = i 
-                    self.nextJ = j
+
+                if depth == self.depth: # and self.is_valid(i,j):
+                    # print('depth==self.depth --> ',i,j, 'depth: ', depth)
+                    self.currentI = i 
+                    self.currentJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
-                    
-                    
+        
                 beta = min(beta, eval)
+                # print('i,j before undoing: ',i,j)
                 self.set_pos_state(i,j,0) #undoing the move
 
                 # del new_bound
+                del new_bound
                 if beta <= alpha:
                     break
             return min_val
 
     def check_result(self):
-        if self.is_five(self.nextI, self.nextJ, self.currentState):
+        if self.is_five(self.currentI, self.currentJ, self.currentState):
             return self.currentState
         else:
             return None
