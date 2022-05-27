@@ -1,6 +1,6 @@
-from board import *
 from evaluation import *
 
+N = 15
 
 class GomokuAI():
     def __init__(self, depth):
@@ -13,9 +13,8 @@ class GomokuAI():
         self.nextValue = 0 # board value
         self.nextBound = {}
 
-    ## to be removed?
-    def get_board_map(self):
-        return self.boardMap
+    # def get_board_map(self):
+    #     return self.boardMap
 
     def draw_board(self):
         '''
@@ -36,8 +35,8 @@ class GomokuAI():
             print()
         print() 
 
-    def get_state(self, i, j):
-        return self.boardMap[i][j]
+    # def get_state(self, i, j):
+    #     return self.boardMap[i][j]
     
     def is_valid(self, i, j, state=True):
         if i<0 or i>14 or j<0 or j>14:
@@ -50,7 +49,6 @@ class GomokuAI():
         else:
             return True
 
-    ### to be removed???
     def set_pos_state(self, i, j, state):
         '''
         States:
@@ -60,8 +58,8 @@ class GomokuAI():
         '''
         assert state in (-1,0,1), 'The state inserted is not -1, 0 or 1'
         self.boardMap[i][j] = state
-        # self.__currentI = i
-        # self.__currentJ = j
+        self.currentI = i
+        self.currentJ = j
         self.currentState = state
 
     def count_direction(self, i, j, xdir, ydir, state):
@@ -92,6 +90,12 @@ class GomokuAI():
                     return True
 
         return False
+
+    # Return all possible child moves (i,j) in a board status given the bound
+    # Sorted in ascending order based on their value
+    def child_nodes(self, bound):
+        for pos in sorted(bound.items(), key=lambda el: el[1], reverse=True):
+            yield pos[0]
 
     # Update new boundary for possible moves given the recently-played move
     def update_bound(self, new_i, new_j, bound):
@@ -158,7 +162,6 @@ class GomokuAI():
                         and self.boardMap[i_new][j_new] == pattern[index]: 
                     # first check if it's the empty position to store
                     # score is also a flag indicating whether modifying the bound
-                    # if self.boardMap[i_new][j_new] == 0:
                     if self.is_valid(i_new, j_new):
                         remember.append((i_new, j_new)) 
                     # go through every square
@@ -171,10 +174,10 @@ class GomokuAI():
                 if index == length:
                     count += 1
                     for pos in remember:
-
                         # check whether pos is already present in bound dict
                         if pos not in bound:
                             bound[pos] = 0
+                            
                         bound[pos] += flag*score  # update better percentage later in evaluate()
                     z += index
                 else:
@@ -200,12 +203,10 @@ class GomokuAI():
             # for every pattern, count have many there are for new_i and new_j
             # and multiply them by the corresponding score
             value_before += self.counting(new_i, new_j, pattern, abs(score), bound, -1)*score
-            print(value_before)
             # make the move then calculate valueAfter,
             # this time, also update the boundary percentage
             self.boardMap[new_i][new_j] = turn
             value_after += self.counting(new_i, new_j, pattern, abs(score), bound, 1) *score
-            print(value_after)
             # delete the move
             self.boardMap[new_i][new_j] = 0
         return board_value + value_after - value_before
@@ -219,45 +220,32 @@ class GomokuAI():
             # initializing max value
             max_val = float("-inf")
             # look through the child nodes using function in board.py
-            for child in child_nodes(bound):
+            for child in self.child_nodes(bound):
                 # child HAVE to be in format of (i,j) or (row, col)
                 i, j = child[0], child[1]
                 # create a new bound with updated values
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
-                # print('new_bound: ',new_bound)
-
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
-                # print('new_val: ',new_val)
-
-                # self.boardMap[i][j] = 1 #AI
                 self.set_pos_state(i,j,1)
                 # update bound based on the new move (i,j)
                 new_bound = self.update_bound(i, j, new_bound) 
-                # print('bound updated max: ',new_bound)
-                # print('depth max: ', depth)
-
-                # print('depth: ', depth)
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, False)
-                # print('ab value: ', eval)
-                # print('print new val: ', new_val)
                 max_val = max(max_val, eval)
-                # print('max_val after: ', max_val)
                 
                 if depth == self.depth: # and self.is_valid(i,j):
-                    # print('depth==self.depth --> ',i,j, 'depth: ', depth)
                     self.currentI = i
                     self.currentJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
+
                 alpha = max(alpha, eval)
-                # print('i,j before undoing: ',i,j)
-                # self.boardMap[i][j] = 0
                 self.set_pos_state(i,j,0) #undoing the move
 
                 # del new_bound
                 del new_bound
+
                 if beta <= alpha:
                     break
             return max_val
@@ -266,37 +254,30 @@ class GomokuAI():
             # initializing min value
             min_val = float("inf")
             # look through the child nodes using function in board.py
-            for child in child_nodes(bound):
+            for child in self.child_nodes(bound):
                 i, j = child[0], child[1]
-                # print('min child: ', child)
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
                 self.set_pos_state(i,j,-1) #human
-                # self.boardMap[i][j] = -1 #human
                 new_bound = self.update_bound(i, j, new_bound)
-
-                # print('depth: ', depth)
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)
-                # print(eval)
-                # print('bbb', new_val)
-                # print('minim eval: ', eval)
                 min_val = min(min_val, eval)
 
                 if depth == self.depth: # and self.is_valid(i,j):
-                    # print('depth==self.depth --> ',i,j, 'depth: ', depth)
                     self.currentI = i 
                     self.currentJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
         
                 beta = min(beta, eval)
-                # print('i,j before undoing: ',i,j)
                 self.set_pos_state(i,j,0) #undoing the move
 
                 # del new_bound
                 del new_bound
+
                 if beta <= alpha:
                     break
+
             return min_val
 
     def check_result(self):
