@@ -13,6 +13,7 @@ class GomokuAI():
         self.nextValue = 0 # board value
         self.nextBound = {}
 
+    ## to be removed?
     def get_board_map(self):
         return self.boardMap
 
@@ -95,7 +96,7 @@ class GomokuAI():
     # Update new boundary for possible moves given the recently-played move
     def update_bound(self, new_i, new_j, bound):
         # get rid of the played position
-        played = get_number(new_i, new_j, N)
+        played = (new_i, new_j)
         if played in bound:
             bound.pop(played)
         # check to add new position
@@ -105,10 +106,13 @@ class GomokuAI():
         for dir in directions:
             new_col = new_j + dir[0]
             new_row = new_i + dir[1]
-            if self.is_valid(new_row, new_col):
-                num = get_number(new_row, new_col, N)
-                if num not in bound:  # if not previously been updated in def evaluation
-                    bound[num] = 1
+            if self.is_valid(new_row, new_col)\
+                and (new_row, new_col) not in bound:  # if not previously been updated in def evaluation
+                bound[(new_row, new_col)] = 0
+        # double check that positions in bound are valid + empty cells
+        for pos in bound:
+            if self.boardMap[pos[0]][pos[1]] != 0:
+                bound.pop(pos)
         return bound
     
     # this counting method takes in x,y position and check the presence of the pattern   
@@ -155,8 +159,8 @@ class GomokuAI():
                     # first check if it's the empty position to store
                     # score is also a flag indicating whether modifying the bound
                     # if self.boardMap[i_new][j_new] == 0:
-                    if self.is_valid(i_new, j_new) == 0:
-                        remember.append(get_number(i_new, j_new, N)) #transforming to ordinal number
+                    if self.is_valid(i_new, j_new):
+                        remember.append((i_new, j_new)) 
                     # go through every square
                     i_new = i_new + dir[1]
                     j_new = j_new + dir[0]
@@ -196,10 +200,12 @@ class GomokuAI():
             # for every pattern, count have many there are for new_i and new_j
             # and multiply them by the corresponding score
             value_before += self.counting(new_i, new_j, pattern, abs(score), bound, -1)*score
+            print(value_before)
             # make the move then calculate valueAfter,
             # this time, also update the boundary percentage
             self.boardMap[new_i][new_j] = turn
             value_after += self.counting(new_i, new_j, pattern, abs(score), bound, 1) *score
+            print(value_after)
             # delete the move
             self.boardMap[new_i][new_j] = 0
         return board_value + value_after - value_before

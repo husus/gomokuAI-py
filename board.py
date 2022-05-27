@@ -29,7 +29,7 @@ def get_position(number, N):
 # Return all possible moves [i,j] that can be made in a given board status given the boundary
 def child_nodes(bound):
     for pos in sorted(bound.items(), key=lambda el: el[1], reverse=True):
-        yield get_position(pos[0], N)
+        yield pos[0]
 
 # Draw the board
 def draw_board(board):
