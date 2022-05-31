@@ -16,8 +16,10 @@ def move(ai, turn, bound):
         print('finished ab prune in: ', end_time - start_time)
         
         if ai.is_valid(ai.currentI, ai.currentJ):
-            move_i = ai.currentI
-            move_j = ai.currentJ
+            bound_sorted = sorted(ai.nextBound.items(), key=lambda el: el[1], reverse=True)
+            pos = bound_sorted[0][0]
+            move_i = pos[0]
+            move_j = pos[1]
             bound = ai.update_bound(move_i, move_j, bound)
             ai.nextBound = bound
             
@@ -116,7 +118,7 @@ board_map = AI.boardMap
 board_value = AI.nextValue
 depth = AI.depth 
 bound = {}
-# play(AI)
+play(AI)
 
 
 # TODO:

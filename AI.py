@@ -235,6 +235,7 @@ class GomokuAI():
                 max_val = max(max_val, eval)
                 
                 if depth == self.depth: # and self.is_valid(i,j):
+                    # bound_sorted = sorted(new_bound.items(), key=lambda el: el[1], reverse=True)
                     self.currentI = i
                     self.currentJ = j
                     self.nextValue = new_val
