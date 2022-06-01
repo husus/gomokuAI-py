@@ -1,7 +1,7 @@
 from AI import *
 from evaluation import *
 import math
-import ast
+import ast #
 import time
 
 
@@ -55,11 +55,10 @@ def move(ai, turn, bound):
 
 def get_winner(ai):
     if ai.check_result() == 1:
-        winner = 'AI'
+        winner = 'Gomoku AI! '
     if ai.check_result() == -1:
-        winner = 'human'
-    else:
-        winner = 'tie'
+        winner = 'Human! '
+
     return winner
 
 
@@ -87,6 +86,8 @@ def play(ai):
             'Please enter a valid key, either b or w.'
     
 
+    ai.colorState[turn] = 'black'
+    ai.colorState[turn*-1] = 'white'
     print('initial move i,j: ', move_i, move_j)
     ai.set_pos_state(move_i, move_j, turn)
     # ai.currentI, ai.currentJ = move_i, move_j
@@ -118,7 +119,7 @@ board_map = AI.boardMap
 board_value = AI.nextValue
 depth = AI.depth 
 bound = {}
-play(AI)
+# play(AI)
 
 
 # TODO:

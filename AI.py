@@ -10,6 +10,7 @@ class GomokuAI():
         self.currentI = -1
         self.currentJ = -1
         self.currentState = 0
+        self.colorState = {} #key: player, value: color
         self.nextValue = 0 # board value
         self.nextBound = {}
 
@@ -282,7 +283,11 @@ class GomokuAI():
             return min_val
 
     def check_result(self):
-        if self.is_five(self.currentI, self.currentJ, self.currentState):
+        if self.is_five(self.currentI, self.currentJ, self.currentState) \
+            and self.currentState in (-1, 1):
             return self.currentState
         else:
             return None
+    
+    def check_tie(self):
+        pass
