@@ -1,6 +1,7 @@
 import pygame
 import os
 from AI import *
+from gomoku import *
 
 SIZE = 540 #size of the board image
 PIECE = 32 #size of the single pieces
@@ -48,7 +49,7 @@ WHITE_PIECE = pygame.image.load(os.path.join("assets", 'white_piece.png')).conve
 #                                cell, cell)
 #             pygame.draw.rect(SCREEN, (255,255,255), rect, 1)
 
-def draw_window():
+# def draw_window():
     # SCREEN.blit(BG, (0,0))
     # SCREEN.blit(BLACK_PIECE, 
     #         (SIZE/2-PIECE/2, SIZE/2-PIECE/2)) #central position of the black piece
@@ -59,14 +60,14 @@ def draw_window():
     # rect = pygame.Rect(7,7,526,526)
     # pygame.draw.rect(SCREEN, (255,255,255), rect, 2) #create a square for saving moves
 
-    mapping = create_mapping()
+    # mapping = create_mapping()
 
-    for v in mapping.values():
-        x = v[0] - PIECE/2
-        y = v[1] - PIECE/2
-        SCREEN.blit(WHITE_PIECE, (x, y))
+    # for v in mapping.values():
+    #     x = v[0] - PIECE/2
+    #     y = v[1] - PIECE/2
+    #     SCREEN.blit(WHITE_PIECE, (x, y))
 
-    pygame.display.update()
+    # pygame.display.update()
 
 def pixel_conversion(list_points, target):
 
@@ -137,8 +138,31 @@ def draw_piece(state, mapping, i, j):
 
     pygame.display.update()
     
-def draw_result():
-    pass
+def draw_result(winner, tie=False):
+    text = ' The winner is: '
+    font = pygame.font.SysFont('Times New Roman', 35)
+
+    render_text = font.render(str.upper(text), True, (255,255,255), (0,0,0))
+    size1 = render_text.get_size()
+    x1 = SIZE//2 - size1[0]//2
+    y1 = SIZE//2 - size1[1]
+
+    render_winner = font.render(str.upper(winner), True, (255,255,255), (0,0,0))
+    size2 = render_winner.get_size()
+    x2 = SIZE//2 - size2[0]//2
+    y2 = (SIZE//2 - size2[1]) + size1[1]
+    rect = pygame.Surface(render_text.get_size())
+    rect.fill((0,0,0))
+    rect.blit(render_winner, (x2, y2))
+
+    if tie:
+        pass
+    
+    SCREEN.blit(render_text, (x1, y1))
+    SCREEN.blit(rect, (x1, y1+ size1[1]))
+    SCREEN.blit(render_winner, (x2, y2))
+
+    pygame.display.update()
 
 def main():
     pygame.init()
@@ -148,6 +172,7 @@ def main():
     pygame.display.update()
     state = 1
     pos_mapping = create_mapping()
+    ai = GomokuAI(3)
 
     while run:
         # clock.tick(FPS) #to control the speed of while loop, never go over that speed
@@ -161,13 +186,24 @@ def main():
                     print(pos)
                     (i, j) = pos_pixel2map(pos[0], pos[1])
                     print((i,j))
-                    # x, y = pos_map2pixel(i,j)
-                    # # x -= PIECE / 2
-                    # # y -= PIECE / 2
         
                     draw_piece(state, pos_mapping, i,j)
-                    # pygame.display.update()
+                    ai.set_pos_state(i, j, state)
                     state *= -1
+
+        if ai.check_result() != None:
+            print(ai.check_result())
+            winner = get_winner(ai)
+            draw_result(winner)
+            ask = input('Do you want to quit? ')
+            if ask == 'y':
+                run = False
+        '''
+        if ai.check_tie():
+            draw_result(tie=False)
+        
+        '''
+
         # draw_window()
         # pygame.display.update()
     pygame.quit()
