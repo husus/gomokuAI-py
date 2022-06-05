@@ -19,7 +19,7 @@ WHITE_PIECE = pygame.image.load(os.path.join("assets", 'white_piece.png')).conve
 
 # Elements for the starting menu interface
 MENU_BOARD = pygame.image.load(os.path.join("assets", "menu_board.png")).convert_alpha()
-MENU_BOARD = pygame.transform.scale(MENU_BOARD, (350, 100))
+# MENU_BOARD = pygame.transform.scale(MENU_BOARD, (350, 100))
 BUTTON_SURF = pygame.image.load(os.path.join("assets", "button.png")).convert_alpha()
 BUTTON_SURF = pygame.transform.scale(BUTTON_SURF, (110, 60))
 # Setting the font of the text in the starting menu
@@ -121,16 +121,12 @@ def create_mapping():
     
     return pos_mapping
 
-def draw_menu(menu_board, menu_font, scale): 
-    menu_board = pygame.transform.scale(menu_board, scale)
+def draw_menu(scale, text, pos): 
+    menu_board = pygame.transform.scale(MENU_BOARD, scale)
     menu_board_rect = menu_board.get_rect(center = SCREEN.get_rect().center)
-    menu_text = menu_font.render('CHOOSE YOUR COLOR: ', True, 'white')
-    menu_board.blit(menu_text, (50,25))
+    menu_text = MENU_FONT.render(text, True, 'white')
+    menu_board.blit(menu_text, pos)
     SCREEN.blit(menu_board, menu_board_rect)
-
-def draw_button(button):
-    button.update()
-    button.change_color(pygame.mouse.get_pos())
     pygame.display.update()
 
 def draw_piece(state, mapping, i, j):
@@ -183,41 +179,41 @@ def main():
     pygame.init()
     # clock = pygame.time.Clock()
     SCREEN.blit(BG, (0,0))
-    draw_menu(MENU_BOARD, MENU_FONT, (350,100))
+    menu_text = 'CHOOSE YOUR COLOR: '
+    draw_menu((350,100), menu_text, (50,25))
 
-    button_black = Button(button_surf, 200, 300, "BLACK", MENU_FONT)
-    button_white = Button(button_surf, 340, 300, "WHITE", MENU_FONT)   
-    draw_button(button_black) 
-    draw_button(button_white)
-    
-    pygame.display.update()
+    button_black = Button(BUTTON_SURF, 200, 300, "BLACK", MENU_FONT)
+    button_white = Button(BUTTON_SURF, 340, 300, "WHITE", MENU_FONT)
 
     while run:
         # clock.tick(FPS) #to control the speed of while loop, never go over that speed
         
+        button_black.draw_button()
+        button_white.draw_button()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
                 button_white.check_mouse_pos(pos)
                 button_black.check_mouse_pos(pos)
-        draw_button(button_black) 
-        draw_button(button_white)
+        
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.mouse.get_pressed()[0]:
-                    pos = pygame.mouse.get_pos()
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         run = False
+        #     elif event.type == pygame.MOUSEBUTTONDOWN:
+        #         if pygame.mouse.get_pressed()[0]:
+        #             pos = pygame.mouse.get_pos()
                     
 
-                    (i, j) = pos_pixel2map(pos[0], pos[1])
-                    print((i,j))
+        #             (i, j) = pos_pixel2map(pos[0], pos[1])
+        #             print((i,j))
         
-                    draw_piece(state, pos_mapping, i,j)
-                    ai.set_pos_state(i, j, state)
-                    state *= -1
+        #             draw_piece(state, pos_mapping, i,j)
+        #             ai.set_pos_state(i, j, state)
+        #             state *= -1
 
         if ai.check_result() != None:
             print(ai.check_result())
@@ -232,8 +228,6 @@ def main():
         
         '''
 
-        # draw_window()
-        # pygame.display.update()
     pygame.quit()
 
 
