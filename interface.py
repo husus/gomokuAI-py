@@ -19,10 +19,63 @@ GRID = (SIZE - 2 * MARGIN) / (N-1)
 
 FPS = 60 #how many frames per second to update the window
 
+def pixel_conversion(list_points, target):
+    # point of the list from where start the search
+    index = int((len(list_points)-1)//2) 
+
+    while True:
+        if target < list_points[0]:
+            index = 0
+            break
+        elif target >= list_points[-1]:
+            index = len(list_points)-2
+            break
+
+        elif list_points[index] > target:
+            if list_points[index-1] <= target:
+                index -= 1
+                break
+            else:
+                index -= 1
+
+        elif list_points[index] <= target:
+            if list_points[index+1] > target:
+                break
+            else:
+                index += 1
+    
+    return index
+
+def pos_pixel2map(x, y):
+    # transform pygame pixel to boardMap coordinates
+
+    start = int(MARGIN - GRID//2)
+    end = int(SIZE - MARGIN + GRID//2)
+    list_points = [p for p in range(start, end+1, int(GRID))]
+
+    i = pixel_conversion(list_points, y)
+    j = pixel_conversion(list_points, x)
+    return (i,j)
+
+def pos_map2pixel(i, j):
+    # transform boardMap to pygame pixel coordinates
+    return (MARGIN + j * GRID - PIECE/2, MARGIN + i * GRID - PIECE/2)
+
+def create_mapping():
+    pos_mapping = {}
+    for i in range(N):
+        for j in range(N):
+            spacing = [r for r in range(MARGIN, SIZE-MARGIN+1, int(GRID))]
+            pos_mapping[(i,j)] = (spacing[j],spacing[i])
+    
+    return pos_mapping
+
+
 class GameUI(object):
     def __init__(self, ai):
         self.ai = ai
         self.colorState = {} #key: turn; value: black/white
+        self.mapping = create_mapping()
         
         # initialize pygame
         pygame.init()
@@ -38,59 +91,7 @@ class GameUI(object):
         self.screen.blit(self.board, (0,0))
         pygame.display.update()
 
-    def pixel_conversion(self, list_points, target):
-        # point of the list from where start the search
-        index = int((len(list_points)-1)//2) 
-
-        while True:
-            if target < list_points[0]:
-                index = 0
-                break
-            elif target >= list_points[-1]:
-                index = len(list_points)-2
-                break
-
-            elif list_points[index] > target:
-                if list_points[index-1] <= target:
-                    index -= 1
-                    break
-                else:
-                    index -= 1
-
-            elif list_points[index] <= target:
-                if list_points[index+1] > target:
-                    break
-                else:
-                    index += 1
-        
-        return index
-
-    def pos_pixel2map(self, x, y):
-        # transform pygame pixel to boardMap coordinates
-
-        start = int(MARGIN - GRID//2)
-        end = int(SIZE - MARGIN + GRID//2)
-        list_points = [p for p in range(start, end+1, int(GRID))]
-
-        i = self.pixel_conversion(list_points, y)
-        j = self.pixel_conversion(list_points, x)
-        return (i,j)
-
-    def pos_map2pixel(self, i, j):
-        # transform boardMap to pygame pixel coordinates
-        return (MARGIN + j * GRID - PIECE/2, MARGIN + i * GRID - PIECE/2)
-
-    def create_mapping(self):
-        pos_mapping = {}
-
-        for i in range(N):
-            for j in range(N):
-                spacing = [r for r in range(MARGIN, SIZE-MARGIN+1, int(GRID))]
-                pos_mapping[(i,j)] = (spacing[j],spacing[i])
-        
-        return pos_mapping
-
-    def draw_menu(self, pos): 
+    def draw_menu(self): 
         menu_board = pygame.transform.scale(self.menuBoard, (350,100))
         menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
 
@@ -119,22 +120,22 @@ class GameUI(object):
             self.ai.currentState = 1
         print(self.colorState)
 
-    def draw_piece(self, state, i, j, mapping):
+    def draw_piece(self, state, i, j):
         
-        x, y = mapping[(i,j)]
+        x, y = self.mapping[(i,j)]
         x = x - PIECE/2
         y = y - PIECE/2
 
-        if state == 'black': #TODO: change to black
+        if state == 'black': 
             self.screen.blit(self.blackPiece, (x, y))
-        elif state == 'white': #TODO: change to white
+        elif state == 'white':
             self.screen.blit(self.whitePiece, (x, y))
 
         pygame.display.update()
 
-    def draw_result(self, winner, tie=False):
+    def draw_result(self, tie=False):
         menu_board = pygame.transform.scale(self.menuBoard, (400,190))
-        menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
+        # menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
         width, height = menu_board.get_size()
         font = pygame.font.SysFont('arial', 25, True)
         
@@ -152,7 +153,7 @@ class GameUI(object):
             size1 = render_text.get_size()
             (x1, y1) = (width//2 - size1[0]//2, 30)
 
-            # winner = self.ai.get_winner()
+            winner = self.ai.get_winner()
             render_winner = font.render(str.upper(winner), True, 'white')
             size2 = render_winner.get_size()
             (x2, y2) = (width//2 - size2[0]//2, 30 + size1[1])
@@ -176,7 +177,7 @@ class GameUI(object):
         yes_button.draw_button(menu_board)
         no_button.draw_button(menu_board)
 
-        self.screen.blit(menu_board, menu_board_rect)
+        self.screen.blit(menu_board, (SIZE//2 - width//2, MARGIN//2))
         pygame.display.update()
 
     def restart_decision(self, pos):
