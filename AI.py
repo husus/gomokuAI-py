@@ -212,7 +212,6 @@ class GomokuAI():
 
     def ab_pruning(self, depth, board_value, bound, alpha, beta, maximizingPlayer):
         if depth <= 0 or (self.check_result() != None): #or end game
-            # print('board value: ',board_value)
             return  board_value #value of current position
         # the maximizing player is AI
         if maximizingPlayer:
@@ -226,7 +225,7 @@ class GomokuAI():
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
-                self.set_pos_state(i,j,1)
+                self.boardMap[i][j] = 1
                 # update bound based on the new move (i,j)
                 self.update_bound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
@@ -234,14 +233,13 @@ class GomokuAI():
                 max_val = max(max_val, eval)
                 
                 if depth == self.depth: # and self.is_valid(i,j):
-                    # bound_sorted = sorted(new_bound.items(), key=lambda el: el[1], reverse=True)
                     self.currentI = i
                     self.currentJ = j
                     self.nextValue = new_val
                     self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
-                self.set_pos_state(i,j,0) #undoing the move
+                self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:
                     break
@@ -255,7 +253,7 @@ class GomokuAI():
                 i, j = child[0], child[1]
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
-                self.set_pos_state(i,j,-1) #human
+                self.boardMap[i][j] = -1 #human
                 self.update_bound(i, j, new_bound)
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)
                 min_val = min(min_val, eval)
@@ -267,7 +265,7 @@ class GomokuAI():
                     self.nextBound = new_bound
         
                 beta = min(beta, eval)
-                self.set_pos_state(i,j,0) #undoing the move
+                self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:
                     break
@@ -285,16 +283,13 @@ class GomokuAI():
             and self.currentState in (-1, 1):
             return self.currentState
         elif self.emptyCells <= 0:
-            # tie result
+            # tie
             return 0
         else:
             return None
     
     def get_winner(self):
         if self.check_result() == 1:
-            winner = 'Gomoku AI! '
+            return 'Gomoku AI! '
         if self.check_result() == -1:
-            winner = 'Human! '
-        return winner
-
-        
+            return 'Human! '
