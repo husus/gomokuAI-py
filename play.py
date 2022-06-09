@@ -23,7 +23,7 @@ if __name__ == '__main__':
     ai = GomokuAI(3)
     game = GameUI(ai)
     game.screen.blit(game.board, (0,0))
-    game.draw_menu()
+    game.drawMenu()
     pygame.display.update()
     # global mapping
     # mapping = create_mapping()
@@ -32,10 +32,10 @@ if __name__ == '__main__':
     end = False
     while run:
         if game.ai.currentState == 0: #if no move has been made yet
-            game.menu_choice()
+            game.menuChoice()
             continue
         
-        result = game.ai.get_winner()
+        result = game.ai.checkResult()
         while result is None and game.ai.currentState!=0:
             turn = game.ai.currentState
             color = game.colorState[turn]
@@ -45,11 +45,11 @@ if __name__ == '__main__':
                     run = False
                 if turn == 1:
                     move_i, move_j = gomoku.ai_move(game.ai)
-                    game.ai.set_pos_state(move_i, move_j, turn)
+                    game.ai.setState(move_i, move_j, turn)
                     # ai.currentI, ai.currentJ = move_i, move_j
                     game.ai.emptyCells -= 1
-                    game.draw_piece(color, move_i, move_j)
-                    result = game.ai.get_winner()
+                    game.drawPiece(color, move_i, move_j)
+                    result = game.ai.checkResult()
                     game.ai.currentState *= -1
 
                 elif turn == -1:
@@ -61,15 +61,15 @@ if __name__ == '__main__':
                         move_j = human_move[1]
                         print(mouse_pos, move_i, move_j)
 
-                        if game.ai.is_valid(move_i, move_j):
-                            game.ai.nextValue = game.ai.evaluate(move_i, move_j, game.ai.nextValue, -1, game.ai.nextBound)
-                            game.ai.update_bound(move_i, move_j, game.ai.nextBound)
+                        if game.ai.isValid(move_i, move_j):
+                            game.ai.boardValue = game.ai.evaluate(move_i, move_j, game.ai.boardValue, -1, game.ai.nextBound)
+                            game.ai.updateBound(move_i, move_j, game.ai.nextBound)
                             # ai.nextBound = bound
                             game.ai.currentI, game.ai.currentJ = move_i, move_j
-                            game.ai.set_pos_state(move_i, move_j, turn)
+                            game.ai.setState(move_i, move_j, turn)
                             game.ai.emptyCells -= 1
-                            game.draw_piece(color, move_i, move_j)
-                            result = game.ai.get_winner()
+                            game.drawPiece(color, move_i, move_j)
+                            result =  game.ai.checkResult()
                             game.ai.currentState *= -1
                     else:
                         continue
@@ -79,16 +79,15 @@ if __name__ == '__main__':
         #     game.draw_result(tie=True)
         #     end = True
         if result != None:
-            print('play.py: ',result, game.ai.get_winner())
-            game.draw_result()
-            game.ai.draw_board()
+            game.drawResult()
+            game.ai.drawBoard()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                 elif event.type == pygame.MOUSEBUTTONDOWN\
                     and pygame.mouse.get_pressed()[0]:
                     mouse_pos = pygame.mouse.get_pos()
-                    game.restart_decision(mouse_pos)
+                    game.restartChoice(mouse_pos)
 
             end = True
 

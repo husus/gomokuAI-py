@@ -91,7 +91,7 @@ class GameUI(object):
         self.screen.blit(self.board, (0,0))
         pygame.display.update()
 
-    def draw_menu(self): 
+    def drawMenu(self): 
         menu_board = pygame.transform.scale(self.menuBoard, (350,100))
         menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
 
@@ -109,18 +109,19 @@ class GameUI(object):
         
         pygame.display.update()
 
-    def check_color_choice(self, pos):
+    def checkColorChoice(self, pos):
+
         if button_black.rect.collidepoint(pos):
             self.colorState[-1] = 'black'
             self.colorState[1] = 'white'
             self.ai.currentState = -1
+
         elif button_white.rect.collidepoint(pos):
             self.colorState[-1] = 'white'
             self.colorState[1] = 'black'
             self.ai.currentState = 1
-        print(self.colorState)
 
-    def draw_piece(self, state, i, j):
+    def drawPiece(self, state, i, j):
         
         x, y = self.mapping[(i,j)]
         x = x - PIECE/2
@@ -133,7 +134,7 @@ class GameUI(object):
 
         pygame.display.update()
 
-    def draw_result(self, tie=False):
+    def drawResult(self, tie=False):
         menu_board = pygame.transform.scale(self.menuBoard, (400,190))
         # menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
         width, height = menu_board.get_size()
@@ -153,7 +154,7 @@ class GameUI(object):
             size1 = render_text.get_size()
             (x1, y1) = (width//2 - size1[0]//2, 30)
 
-            winner = self.ai.get_winner()
+            winner = self.ai.getWinner()
             print('interface.py: ',winner)
             render_winner = font.render(str.upper(winner), True, 'white')
             size2 = render_winner.get_size()
@@ -181,24 +182,24 @@ class GameUI(object):
         self.screen.blit(menu_board, (SIZE//2 - width//2, MARGIN//2))
         pygame.display.update()
 
-    def menu_choice(self):
+    def menuChoice(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             elif event.type == pygame.MOUSEBUTTONDOWN \
                 and pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                self.check_color_choice(pos)
+                self.checkColorChoice(pos)
                 self.screen.blit(self.board, (0,0))
                 pygame.display.update()
                 if self.ai.currentState == 1:
                     # set the first move of the AI at the center
-                    self.draw_piece('black', 7, 7)
+                    self.drawPiece('black', 7, 7)
                     pygame.display.update()
                     self.ai.currentState *= -1
 
 
-    def restart_decision(self, pos):
+    def restartChoice(self, pos):
         # for event in pygame.event.get():
         #     if event.type == pygame.MOUSEBUTTONDOWN \
         #         and pygame.mouse.get_pressed()[0]:
