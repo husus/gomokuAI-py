@@ -1,23 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env
@@ -28,12 +10,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# mkdocs documentation
-/site
-
-# Pyre type checker
-.pyre/
-
 button_trial.py
 assets/button2.png 
 assets/button3.png 
+testing.py
