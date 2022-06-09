@@ -10,9 +10,8 @@ class GomokuAI():
         self.currentI = -1
         self.currentJ = -1
         self.currentState = 0
-        self.nextValue = 0 # board value
+        self.boardValue = 0 # board value
         self.nextBound = {}
-        self.colorState = {} #key: player, value: color
         self.emptyCells = N*N
 
     def draw_board(self):
@@ -54,13 +53,8 @@ class GomokuAI():
         '''
         assert state in (-1,0,1), 'The state inserted is not -1, 0 or 1'
         self.boardMap[i][j] = state
-        # self.currentI = i
-        # self.currentJ = j
         self.currentState = state
-        # if state == 0 and self.emptyCells<N*N:
-        #     self.emptyCells += 1
-        # if state != 0:
-        #     self.emptyCells -= 1
+
 
     def count_direction(self, i, j, xdir, ydir, state):
         count = 0
@@ -225,21 +219,22 @@ class GomokuAI():
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
-                self.set_pos_state(i,j,1)
+                self.set_pos_state(i, j, 1)
                 # update bound based on the new move (i,j)
                 self.update_bound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, False)
-                max_val = max(max_val, eval)
-                
-                if depth == self.depth: # and self.is_valid(i,j):
-                    self.currentI = i
-                    self.currentJ = j
-                    self.nextValue = new_val
-                    self.nextBound = new_bound
+                if eval > max_val:
+                    # reset max value to eval and set next move and next value according to current checked position
+                    max_val = eval
+                    if depth == self.depth: # and self.is_valid(i,j):
+                        self.currentI = i
+                        self.currentJ = j
+                        self.boardValue = eval #changed from new_val
+                        self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
-                self.set_pos_state(i,j,0) #undoing the move
+                self.set_pos_state(i, j, 0) #undoing the move
 
                 if beta <= alpha:
                     break
@@ -253,19 +248,20 @@ class GomokuAI():
                 i, j = child[0], child[1]
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
-                self.boardMap[i][j] = -1 #human
+                self.set_pos_state(i, j, -1) #human
                 self.update_bound(i, j, new_bound)
                 eval = self.ab_pruning(depth-1, new_val, new_bound, alpha, beta, True)
-                min_val = min(min_val, eval)
-
-                if depth == self.depth: # and self.is_valid(i,j):
-                    self.currentI = i 
-                    self.currentJ = j
-                    self.nextValue = new_val
-                    self.nextBound = new_bound
+                
+                if eval < min_val:
+                    min_val = eval
+                    if depth == self.depth: # and self.is_valid(i,j):
+                        self.currentI = i 
+                        self.currentJ = j
+                        self.boardValue = eval #changed from new_val
+                        self.nextBound = new_bound
         
                 beta = min(beta, eval)
-                self.boardMap[i][j] = 0 #undoing the move
+                self.set_pos_state(i, j, 0) #undoing the move
 
                 if beta <= alpha:
                     break
