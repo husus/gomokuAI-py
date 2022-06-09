@@ -54,13 +54,13 @@ class GomokuAI():
         '''
         assert state in (-1,0,1), 'The state inserted is not -1, 0 or 1'
         self.boardMap[i][j] = state
-        self.currentI = i
-        self.currentJ = j
+        # self.currentI = i
+        # self.currentJ = j
         self.currentState = state
-        if state == 0 and self.emptyCells<N*N:
-            self.emptyCells += 1
-        if state != 0:
-            self.emptyCells -= 1
+        # if state == 0 and self.emptyCells<N*N:
+        #     self.emptyCells += 1
+        # if state != 0:
+        #     self.emptyCells -= 1
 
     def count_direction(self, i, j, xdir, ydir, state):
         count = 0
@@ -225,7 +225,7 @@ class GomokuAI():
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
-                self.boardMap[i][j] = 1
+                self.set_pos_state(i,j,1)
                 # update bound based on the new move (i,j)
                 self.update_bound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
@@ -239,7 +239,7 @@ class GomokuAI():
                     self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
-                self.boardMap[i][j] = 0 #undoing the move
+                self.set_pos_state(i,j,0) #undoing the move
 
                 if beta <= alpha:
                     break
@@ -271,12 +271,6 @@ class GomokuAI():
                     break
 
             return min_val
-
-    # def first_move(self):
-    #     self.currentState = 1
-    #     i, j = 7, 7
-    #     if self.is_valid(i, j):
-    #         self.boardMap[7][7] = 1
 
     def check_result(self):
         if self.is_five(self.currentI, self.currentJ, self.currentState) \

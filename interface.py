@@ -154,6 +154,7 @@ class GameUI(object):
             (x1, y1) = (width//2 - size1[0]//2, 30)
 
             winner = self.ai.get_winner()
+            print('interface.py: ',winner)
             render_winner = font.render(str.upper(winner), True, 'white')
             size2 = render_winner.get_size()
             (x2, y2) = (width//2 - size2[0]//2, 30 + size1[1])
@@ -180,6 +181,23 @@ class GameUI(object):
         self.screen.blit(menu_board, (SIZE//2 - width//2, MARGIN//2))
         pygame.display.update()
 
+    def menu_choice(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN \
+                and pygame.mouse.get_pressed()[0]:
+                pos = pygame.mouse.get_pos()
+                self.check_color_choice(pos)
+                self.screen.blit(self.board, (0,0))
+                pygame.display.update()
+                if self.ai.currentState == 1:
+                    # set the first move of the AI at the center
+                    self.draw_piece('black', 7, 7)
+                    pygame.display.update()
+                    self.ai.currentState *= -1
+
+
     def restart_decision(self, pos):
         # for event in pygame.event.get():
         #     if event.type == pygame.MOUSEBUTTONDOWN \
@@ -187,137 +205,7 @@ class GameUI(object):
         # pos = pygame.mouse.get_pos()
         if yes_button.rect.collidepoint(pos):
             print('yes')
+            # return True
         elif no_button.rect.collidepoint(pos):
             print('no')
-
-        
-
-'''
-from interface import *
-from AI import *
-
-ai = GomokuAI(3)
-g = GameUI(ai)
-g.screen.blit(g.board, (0,0))
-
-run = True
-while run:
-    g.draw_result('Human! ')
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        elif event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
-            pos = pygame.mouse.get_pos()
-            g.restart_decision(pos)
-'''
-
-'''
-
-    
-def draw_result(winner, tie=False):
-    text = ' The winner is: '
-    text_font = pygame.font.SysFont('arial', 35)
-
-    render_text = text_font.render(str.upper(text), True, (255,255,255), (0,0,0))
-    size1 = render_text.get_size()
-    x1 = SIZE//2 - size1[0]//2
-    y1 = SIZE//2 - size1[1]
-
-    render_winner = text_font.render(str.upper(winner), True, (255,255,255), (0,0,0))
-    size2 = render_winner.get_size()
-    x2 = SIZE//2 - size2[0]//2
-    y2 = (SIZE//2 - size2[1]) + size1[1]
-    rect = pygame.Surface(render_text.get_size())
-    rect.fill((0,0,0))
-    rect.blit(render_winner, (x2, y2))
-
-    if tie:
-        pass
-    
-    SCREEN.blit(render_text, (x1, y1))
-    SCREEN.blit(rect, (x1, y1+ size1[1]))
-    SCREEN.blit(render_winner, (x2, y2))
-
-    pygame.display.update()
-
-def start_menu(ai):
-    run = True
-
-    pygame.init()
-    clock = pygame.time.Clock()
-    SCREEN.blit(BG, (0,0))
-    menu_text = 'CHOOSE YOUR COLOR: '
-    draw_menu(menu_text, (50,25))
-
-    button_black = Button(BUTTON_SURF, 200, 300, "BLACK", MENU_FONT)
-    button_white = Button(BUTTON_SURF, 340, 300, "WHITE", MENU_FONT)
-    button_black.draw_button(SCREEN)
-    button_white.draw_button(SCREEN)
-    pygame.display.update()
-
-    while run:
-        clock.tick(FPS) #to control the speed of while loop, never go over that speed
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            elif event.type == pygame.MOUSEBUTTONDOWN\
-                and pygame.mouse.get_pressed()[0]:
-                pos = pygame.mouse.get_pos()
-                if button_black.rect.collidepoint(pos):
-                    ai.colorState[-1] = 'black'
-                    ai.colorState[1] = 'white'
-                    ai.currentState = -1
-                if button_white.rect.collidepoint(pos):
-                    ai.colorState[-1] = 'white'
-                    ai.colorState[1] = 'black'
-                    ai.currentState = 1
-                
-                SCREEN.blit(BG, (0,0))
-                
-
-                mouse = pygame.mouse.get_pos()
-                human_move = pos_pixel2map(mouse[0], mouse[1])
-                print(pos, mouse, human_move)
-
-                
-                # i,j = first_move(ai, human_choice)
-                # turn = ai.currentState
-                # ai.set_pos_state(i, j, turn)
-                # draw_piece(ai.colorState[turn], mapping, i, j)
-                # ai.currentState *= -1
-                # break
-
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         run = False
-        #     elif event.type == pygame.MOUSEBUTTONDOWN\
-        #         and pygame.mouse.get_pressed()[0]:
-                
-        #         turn = ai.currentState
-        #         ai.set_pos_state(i, j, turn)
-        #         draw_piece(ai.colorState[turn], mapping, i, j)
-        #         ai.currentState *= -1
-
-
-        # if ai.check_result() != None:
-        #     print(ai.check_result())
-        #     winner = get_winner(ai)
-        #     draw_result(winner)
-        #     ask = input('Do you want to quit? ')
-        #     if ask == 'y':
-        #         run = False
-        
-        # if ai.check_tie():
-        #     draw_result(tie=False)
-        
-        
-
-    # pygame.quit()
-
-
-# if __name__ == '__main__':
-#     AI = GomokuAI(3)
-#     start_menu(AI)
-
-'''
+            # return False
