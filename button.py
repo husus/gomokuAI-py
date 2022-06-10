@@ -17,20 +17,20 @@ class Button():
         surface.blit(self.image, self.rect)
         surface.blit(self.text, self.text_rect)
         
-    def check_mouse_pos(self, position):
-        return position[0] in range(self.rect.left, self.rect.right) and\
-			 position[1] in range(self.rect.top, self.rect.bottom)
+    def checkMousePos(self, pos):
+        return pos[0] in range(self.rect.left, self.rect.right) and\
+			 pos[1] in range(self.rect.top, self.rect.bottom)
 
-    def change_color(self, position):
-        if position[0] in range(self.rect.left, self.rect.right) and\
-            position[1] in range(self.rect.top, self.rect.bottom):
+    def changeColor(self, pos):
+        if pos[0] in range(self.rect.left, self.rect.right) and\
+            pos[1] in range(self.rect.top, self.rect.bottom):
             self.text = self.button_font.render(self.text_input, True, 'yellow')
         else:
             self.text = self.button_font.render(self.text_input, True, "white")
             
-    def draw_button(self, surface):
+    def draw(self, surface):
         self.update(surface)
-        self.change_color(pygame.mouse.get_pos())
+        self.changeColor(pygame.mouse.get_pos())
         pygame.display.update()
         
 

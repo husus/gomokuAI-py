@@ -88,6 +88,7 @@ class GameUI(object):
         self.whitePiece = pygame.image.load(os.path.join("assets", 'white_piece.png')).convert_alpha()
         self.menuBoard = pygame.image.load(os.path.join("assets", "menu_board.png")).convert_alpha()
         self.buttonSurf = pygame.image.load(os.path.join("assets", "button.png")).convert_alpha()
+        self.buttonSurf = pygame.transform.scale(self.buttonSurf, (110, 60)) 
         self.screen.blit(self.board, (0,0))
         pygame.display.update()
 
@@ -100,14 +101,16 @@ class GameUI(object):
         menu_board.blit(menu_text, (50,25))
         self.screen.blit(menu_board, menu_board_rect)
 
-        button_surface = pygame.transform.scale(self.buttonSurf, (110, 60)) 
+        # button_surface = pygame.transform.scale(self.buttonSurf, (110, 60)) 
         global button_black, button_white   
-        button_black = Button(button_surface, 200, 300, "BLACK", menu_font)
-        button_white = Button(button_surface, 340, 300, "WHITE", menu_font)
-        button_white.draw_button(self.screen)
-        button_black.draw_button(self.screen)
-        
+        button_black = Button(self.buttonSurf, 200, 300, "BLACK", menu_font)
+        button_white = Button(self.buttonSurf, 340, 300, "WHITE", menu_font)
+
         pygame.display.update()
+    
+    def drawButtons(self, button1, button2, surface):
+        button1.draw(surface)
+        button2.draw(surface)
 
     def checkColorChoice(self, pos):
 
@@ -155,7 +158,7 @@ class GameUI(object):
             (x1, y1) = (width//2 - size1[0]//2, 30)
 
             winner = self.ai.getWinner()
-            print('interface.py: ',winner)
+            # print('interface.py: ',winner)
             render_winner = font.render(str.upper(winner), True, 'white')
             size2 = render_winner.get_size()
             (x2, y2) = (width//2 - size2[0]//2, 30 + size1[1])
@@ -170,14 +173,14 @@ class GameUI(object):
         (x3, y3) = (width//2 - restart_size[0]//2, height//2) #- restart_size[1]//2)
         menu_board.blit(render_restart, (x3, y3))
 
-        button_surface = pygame.transform.scale(self.buttonSurf, (90, 50))
+        # button_surface = pygame.transform.scale(self.buttonSurf, (90, 50))
         (x4, y4) = (width * 0.25 + 15, height * 0.75)
         (x5, y5) = (width * 0.75 - 15, height * 0.75)
         global yes_button, no_button
-        yes_button = Button(button_surface, x4, y4, "YES", restart_font)
-        no_button = Button(button_surface, x5, y5, "NO", restart_font)
-        yes_button.draw_button(menu_board)
-        no_button.draw_button(menu_board)
+        # TODO: check which button surface suits the restart board
+        yes_button = Button(self.buttonSurf, x4, y4, "YES", restart_font)
+        no_button = Button(self.buttonSurf, x5, y5, "NO", restart_font)
+        self.drawButtons(yes_button, no_button, menu_board)
 
         self.screen.blit(menu_board, (SIZE//2 - width//2, MARGIN//2))
         pygame.display.update()
@@ -197,7 +200,6 @@ class GameUI(object):
                     self.drawPiece('black', 7, 7)
                     pygame.display.update()
                     self.ai.currentState *= -1
-
 
     def restartChoice(self, pos):
         # for event in pygame.event.get():

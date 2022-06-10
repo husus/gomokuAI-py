@@ -16,22 +16,24 @@ import pygame
 #     ui.draw_piece(ui.colorState[turn], i, j)
 #     pygame.display.update()
 #     ai.currentState *= -1
-    
+
+menu_font = pygame.font.SysFont("arial", 22)
 
 if __name__ == '__main__':
 
     ai = GomokuAI(3)
     game = GameUI(ai)
+    button_black = Button(game.buttonSurf, 200, 300, "BLACK", menu_font)
+    button_white = Button(game.buttonSurf, 340, 300, "WHITE", menu_font)
     game.screen.blit(game.board, (0,0))
     game.drawMenu()
     pygame.display.update()
-    # global mapping
-    # mapping = create_mapping()
 
     run = True
     end = False
     while run:
         if game.ai.currentState == 0: #if no move has been made yet
+            game.drawButtons(button_black, button_white, game.screen)
             game.menuChoice()
             continue
         
@@ -74,10 +76,11 @@ if __name__ == '__main__':
                     else:
                         continue
             
-        # if result == 0:
-        #     print("it's a tie!")
-        #     game.draw_result(tie=True)
-        #     end = True
+        if result == 0:
+            print("it's a tie!")
+            game.draw_result(tie=True)
+            end = True
+
         if result != None:
             game.drawResult()
             game.ai.drawBoard()
