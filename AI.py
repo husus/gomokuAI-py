@@ -84,7 +84,6 @@ class GomokuAI():
                 axis_count += self.countDirection(i, j, xdir, ydir, state)
                 if axis_count >= 5:
                     return True
-
         return False
 
     # Return all possible child moves (i,j) in a board status given the bound
@@ -268,6 +267,10 @@ class GomokuAI():
 
             return min_val
 
+    def firstMove(self):
+        self.currentI, self.currentJ = 7,7
+        self.setState(self.currentI, self.currentJ, 1)
+
     def checkResult(self):
         if self.isFive(self.currentI, self.currentJ, self.currentState) \
             and self.currentState in (-1, 1):
@@ -279,7 +282,9 @@ class GomokuAI():
             return None
     
     def getWinner(self):
-        if self.check_result() == 1:
+        if self.checkResult() == 1:
             return 'Gomoku AI! '
-        if self.check_result() == -1:
+        if self.checkResult() == -1:
             return 'Human! '
+        else:
+            return 'Error'
