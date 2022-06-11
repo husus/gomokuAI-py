@@ -19,14 +19,22 @@ def ai_move(ai):
         # move_i = pos[0]
         # move_j = pos[1]
         move_i, move_j = ai.currentI, ai.currentJ
+        print(move_i, move_j)
         ai.updateBound(move_i, move_j, ai.nextBound)
         # ai.nextBound = bound  
     else:
-        print('Error: i and j not valid.')
+        print('Error: i and j not valid. Given: ', ai.currentI, ai.currentJ)
         ai.updateBound(ai.currentI, ai.currentJ, ai.nextBound)
-        move_i, move_j = ai_move(ai)
+        bound_sorted = sorted(ai.nextBound.items(), key=lambda el: el[1], reverse=True)
+        pos = bound_sorted[0][0]
+        move_i = pos[0]
+        move_j = pos[1]
+        ai.currentI, ai.currentJ = move_i, move_j
+        # move_i, move_j = ai_move(ai)
+        print(move_i, move_j)
         # ai.AlphaBetaPruning(ai.depth, ai.boardValue, ai.nextBound, -math.inf, math.inf, True)
-
+    
+    print('before return ai move: ', move_i, move_j)
     return move_i, move_j
 
 def check_human_move(ai, mouse_pos):

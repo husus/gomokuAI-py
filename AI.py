@@ -109,17 +109,17 @@ class GomokuAI():
         # check to add new position
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, 1), (1, -1), (-1, -1), (1, 1)]
         # check at 2 more steps on a certain direction
-        for i in range(1,3):
-            for dir in directions:
-                new_col = new_j + i * dir[0]
-                new_row = new_i + i * dir[1]
-                if self.isValid(new_row, new_col)\
-                    and (new_row, new_col) not in bound:  # if not previously been updated in def evaluation
-                    bound[(new_row, new_col)] = 0
+        # for i in range(1,3):
+        for dir in directions:
+            new_col = new_j + dir[0]
+            new_row = new_i + dir[1]
+            if self.isValid(new_row, new_col)\
+                and (new_row, new_col) not in bound:  # if not previously been updated in def evaluation
+                bound[(new_row, new_col)] = 0
         # double check that positions in bound are valid + empty cells
-        for pos in bound:
-            if self.boardMap[pos[0]][pos[1]] != 0:
-                bound.pop(pos)
+        # for pos in bound:
+        #     if self.boardMap[pos[0]][pos[1]] != 0:
+        #         bound.pop(pos)
     
     # this method takes in x,y position and check the presence of the pattern   
     # and how many there are around that position (horizontally, vertically and diagonally)
@@ -252,11 +252,12 @@ class GomokuAI():
                         self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
-                utils.update_table(self.TTable, hash, max_val, depth)
+                utils.update_table(self.TTable, hash, eval, depth) #changed eval from max_val
 
                 self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:
+                    self.TTable.pop(hash, None)
                     break
             
             return max_val
@@ -282,11 +283,12 @@ class GomokuAI():
                         self.nextBound = new_bound
         
                 beta = min(beta, eval)
-                utils.update_table(self.TTable, hash, min_val, depth)
+                utils.update_table(self.TTable, hash, eval, depth) #changed eval from min_val
 
                 self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:
+                    self.TTable.pop(hash, None)
                     break
 
             return min_val

@@ -3,6 +3,8 @@ from AI import *
 import gomoku
 import pygame
 
+menu_font = pygame.font.SysFont("arial", 22)
+
 # Game initializer function
 # Link interface with gomoku moves and AI
 # Script to be run
@@ -17,7 +19,7 @@ import pygame
 #     pygame.display.update()
 #     ai.currentState *= -1
 
-menu_font = pygame.font.SysFont("arial", 22)
+
 
 if __name__ == '__main__':
 
@@ -30,7 +32,6 @@ if __name__ == '__main__':
     pygame.display.update()
 
     run = True
-    end = False
     while run:
         if game.ai.currentState == 0: #if no move has been made yet
             game.drawButtons(button_black, button_white, game.screen)
@@ -76,11 +77,7 @@ if __name__ == '__main__':
                             game.ai.currentState *= -1
                 else:
                     continue
-            
-        # if result == 0:
-        #     print("it's a tie!")
-        #     game.drawResult(tie=True)
-        #     end = True
+    
         
         pygame.display.flip()
         print('result before: ', game.ai.currentState)
@@ -109,10 +106,6 @@ if __name__ == '__main__':
                         run = True
                         print('YES')
 
-            # end = True
-
-        # if end:
-        #     pass
         pygame.display.update()
                
     pygame.quit()
