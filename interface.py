@@ -2,6 +2,7 @@ import pygame
 import os
 # from AI import *
 from button import *
+import utils
 
 
 SIZE = 540 #size of the board image
@@ -10,72 +11,15 @@ N = 15
 MARGIN = 23
 GRID = (SIZE - 2 * MARGIN) / (N-1)
 
-# Elements for the starting menu interface
-# MENU_BOARD = pygame.image.load(os.path.join("assets", "menu_board.png")).convert_alpha()
-# # MENU_BOARD = pygame.transform.scale(MENU_BOARD, (350, 100))
-# BUTTON_SURF = pygame.image.load(os.path.join("assets", "button.png")).convert_alpha()
-# BUTTON_SURF = pygame.transform.scale(BUTTON_SURF, (110, 60))
-
-
 FPS = 60 #how many frames per second to update the window
-
-def pixel_conversion(list_points, target):
-    # point of the list from where start the search
-    index = int((len(list_points)-1)//2) 
-
-    while True:
-        if target < list_points[0]:
-            index = 0
-            break
-        elif target >= list_points[-1]:
-            index = len(list_points)-2
-            break
-
-        elif list_points[index] > target:
-            if list_points[index-1] <= target:
-                index -= 1
-                break
-            else:
-                index -= 1
-
-        elif list_points[index] <= target:
-            if list_points[index+1] > target:
-                break
-            else:
-                index += 1
-    
-    return index
-
-def pos_pixel2map(x, y):
-    # transform pygame pixel to boardMap coordinates
-
-    start = int(MARGIN - GRID//2)
-    end = int(SIZE - MARGIN + GRID//2)
-    list_points = [p for p in range(start, end+1, int(GRID))]
-
-    i = pixel_conversion(list_points, y)
-    j = pixel_conversion(list_points, x)
-    return (i,j)
-
-def pos_map2pixel(i, j):
-    # transform boardMap to pygame pixel coordinates
-    return (MARGIN + j * GRID - PIECE/2, MARGIN + i * GRID - PIECE/2)
-
-def create_mapping():
-    pos_mapping = {}
-    for i in range(N):
-        for j in range(N):
-            spacing = [r for r in range(MARGIN, SIZE-MARGIN+1, int(GRID))]
-            pos_mapping[(i,j)] = (spacing[j],spacing[i])
-    
-    return pos_mapping
 
 
 class GameUI(object):
     def __init__(self, ai):
         self.ai = ai
         self.colorState = {} #key: turn; value: black/white
-        self.mapping = create_mapping()
+        self.mapping = utils.create_mapping()
+        self.turn = 0
         
         # initialize pygame
         pygame.init()
@@ -105,6 +49,8 @@ class GameUI(object):
         global button_black, button_white   
         button_black = Button(self.buttonSurf, 200, 300, "BLACK", menu_font)
         button_white = Button(self.buttonSurf, 340, 300, "WHITE", menu_font)
+        # button_black.draw(self.screen)
+        # button_white.draw(self.screen)
 
         pygame.display.update()
     
@@ -113,16 +59,17 @@ class GameUI(object):
         button2.draw(surface)
 
     def checkColorChoice(self, pos):
-
         if button_black.rect.collidepoint(pos):
             self.colorState[-1] = 'black'
             self.colorState[1] = 'white'
             self.ai.currentState = -1
+            self.turn = -1
 
         elif button_white.rect.collidepoint(pos):
             self.colorState[-1] = 'white'
             self.colorState[1] = 'black'
             self.ai.currentState = 1
+            self.turn = 1
 
     def drawPiece(self, state, i, j):
         
@@ -190,7 +137,7 @@ class GameUI(object):
             if event.type == pygame.QUIT:
                 pygame.quit()
             elif event.type == pygame.MOUSEBUTTONDOWN \
-                and pygame.mouse.get_pressed()[0]:
+                    and pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
                 self.checkColorChoice(pos)
                 self.screen.blit(self.board, (0,0))
@@ -200,6 +147,38 @@ class GameUI(object):
                     self.drawPiece('black', 7, 7)
                     pygame.display.update()
                     self.ai.currentState *= -1
+    #             print(self.colorState)
+    #     self.firstMove()
+
+    # def firstMove(self):
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             pygame.quit()
+    #         elif event.type == pygame.MOUSEBUTTONDOWN \
+    #             and pygame.mouse.get_pressed()[0]:
+
+    #             if self.ai.currentState == 1:
+    #                 # set the first move of the AI at the center
+    #                 self.drawPiece('black', 7, 7)
+    #                 break
+
+    #             if self.ai.currentState == -1:
+    #                 mouse_pos = pygame.mouse.get_pos()
+    #                 human_move = pos_pixel2map(mouse_pos[0], mouse_pos[1])
+    #                 move_i = human_move[0]
+    #                 move_j = human_move[1]
+    #                 if self.ai.isValid(move_i, move_j):
+    #                     self.ai.boardValue = self.ai.evaluate(move_i, move_j, self.ai.boardValue, -1, self.ai.nextBound)
+    #                     self.ai.updateBound(move_i, move_j, self.ai.nextBound)
+    #                     self.ai.currentI, self.ai.currentJ = move_i, move_j
+    #                     self.ai.setState(move_i, move_j, self.ai.currentState)
+    #                     self.ai.emptyCells -= 1
+    #                     self.drawPiece('black', move_i, move_j)
+    #                     break
+
+        
+
+        # self.ai.currentState *= -1
 
     def restartChoice(self, pos):
         # for event in pygame.event.get():
@@ -207,8 +186,13 @@ class GameUI(object):
         #         and pygame.mouse.get_pressed()[0]:
         # pos = pygame.mouse.get_pos()
         if yes_button.rect.collidepoint(pos):
-            print('yes')
-            # return True
-        elif no_button.rect.collidepoint(pos):
-            print('no')
-            # return False
+            # print('yes')
+            return True
+        if no_button.rect.collidepoint(pos):
+            # print('no')
+            return False
+        else:
+            return 'pos: ', pos
+
+    def changeState(self):
+        pass

@@ -1,7 +1,11 @@
 from evaluation import *
+import utils
 import math
+import sys
+sys.setrecursionlimit(1500)
 
 N = 15
+# TTABLE = {}
 
 class GomokuAI():
     def __init__(self, depth):
@@ -11,11 +15,15 @@ class GomokuAI():
         self.currentI = -1
         self.currentJ = -1
         self.currentState = 0
-        self.boardValue = 0 # board value
+        self.boardValue = 0 #board value
         self.nextBound = {}
         self.emptyCells = N*N
-        self.patternDict = create_pattern_dict() #from evaluation.py
+        self.patternDict = utils.create_pattern_dict() #from evaluation.py
 
+        self.zobristTable = utils.init_zobrist()
+        self.TTable = {}
+
+    # Draw board in string format
     def drawBoard(self):
         '''
         States:
@@ -205,9 +213,18 @@ class GomokuAI():
             self.boardMap[new_i][new_j] = 0
         return board_value + value_after - value_before
 
-    def AlphaBetaPruning(self, depth, board_value, bound, alpha, beta, maximizingPlayer):
+    # def updateTTable(self, hash, score, depth):
+    #     self.TTable.update({hash: [score, depth]})
+
+    def alphaBetaPruning(self, depth, board_value, bound, alpha, beta, maximizingPlayer):
         if depth <= 0 or (self.checkResult() != None): #or end game
             return  board_value #value of current position
+
+        hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+        #Suppose TTable of the format --> {hash: [score, depth]}
+        if hash in self.TTable and self.TTable[hash][1] >= depth:
+            return self.TTable[hash][0] #return board value/ or move, stored in ttable
+
         # the maximizing player is AI
         if maximizingPlayer:
             # initializing max value
@@ -220,10 +237,11 @@ class GomokuAI():
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
                 self.boardMap[i][j] = 1
+                hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
                 # update bound based on the new move (i,j)
                 self.updateBound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
-                eval = self.AlphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, False)
+                eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, False)
                 if eval > max_val:
                     # reset max value to eval and set next move and next value according to current checked position
                     max_val = eval
@@ -234,10 +252,13 @@ class GomokuAI():
                         self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
+                utils.update_table(self.TTable, hash, max_val, depth)
+
                 self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:
                     break
+            
             return max_val
 
         else:
@@ -249,8 +270,9 @@ class GomokuAI():
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
                 self.boardMap[i][j] = -1 #human
+                hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
                 self.updateBound(i, j, new_bound)
-                eval = self.AlphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, True)
+                eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, True)
                 if eval < min_val:
                     min_val = eval
                     if depth == self.depth: # and self.is_valid(i,j):
@@ -260,6 +282,8 @@ class GomokuAI():
                         self.nextBound = new_bound
         
                 beta = min(beta, eval)
+                utils.update_table(self.TTable, hash, min_val, depth)
+
                 self.boardMap[i][j] = 0 #undoing the move
 
                 if beta <= alpha:

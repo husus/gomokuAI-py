@@ -1,3 +1,6 @@
+import random
+
+##### For managing the interface #####
 SIZE = 540 #size of the board image
 PIECE = 32 #size of the single pieces
 N = 15
@@ -54,3 +57,81 @@ def create_mapping():
             pos_mapping[(i,j)] = (spacing[j],spacing[i])
     
     return pos_mapping
+
+
+
+##### Pattern scores #####
+def create_pattern_dict():
+    x = -1
+    patternDict = {}
+    while (x < 2):
+        y = -x
+        # long_5
+        patternDict[(x, x, x, x, x)] = 1000000 * x
+        # live_4
+        patternDict[(0, x, x, x, x, 0)] = 50000 * x
+        # go_4
+        patternDict[(0, x, x, x, x, y)] = 10000 * x
+        patternDict[(y, x, x, x, x, 0)] = 10000 * x
+        patternDict[(0, x, x, x, 0, x, 0)] = 10000 * x
+        patternDict[(0, x, 0, x, x, x, 0)] = 10000 * x
+        patternDict[(0, x, x, 0, x, x, 0)] = 10000 * x
+        # dead_4
+        patternDict[(y, x, x, x, x, y)] = -50 * x
+        # live_3
+        patternDict[(0, x, x, x, 0)] = 5000 * x
+        patternDict[(0, x, 0, x, x, 0)] = 5000 * x
+        patternDict[(0, x, x, 0, x, 0)] = 5000 * x
+        # sleep_3
+        patternDict[(0, 0, x, x, x, y)] = 500 * x
+        patternDict[(y, x, x, x, 0, 0)] = 500 * x
+        patternDict[(0, x, 0, x, x, y)] = 500 * x
+        patternDict[(y, x, x, 0, x, 0)] = 500 * x
+        patternDict[(0, x, x, 0, x, y)] = 500 * x
+        patternDict[(y, x, 0, x, x, 0)] = 500 * x
+        patternDict[(x, 0, 0, x, x)] = 500 * x
+        patternDict[(x, x, 0, 0, x)] = 500 * x
+        patternDict[(x, 0, x, 0, x)] = 500 * x
+        patternDict[(y, 0, x, x, x, 0, y)] = 500 * x
+        # dead_3
+        patternDict[(y, x, x, x, y)] = -50 * x
+        # live_2
+        patternDict[(0, 0, x, x, 0)] = 100 * x
+        patternDict[(0, x, x, 0, 0)] = 100 * x
+        patternDict[(0, x, 0, x, 0)] = 100 * x
+        patternDict[(0, x, 0, 0, x, 0)] = 100 * x
+        # sleep_2
+        patternDict[(0, 0, 0, x, x, y)] = 50 * x
+        patternDict[(y, x, x, 0, 0, 0)] = 50 * x
+        patternDict[(0, 0, x, 0, x, y)] = 50 * x
+        patternDict[(y, x, 0, x, 0, 0)] = 50 * x
+        patternDict[(0, x, 0, 0, x, y)] = 50 * x
+        patternDict[(y, x, 0, 0, x, 0)] = 50 * x
+        patternDict[(x, 0, 0, 0, x)] = 50 * x
+        patternDict[(y, 0, x, 0, x, 0, y)] = 50 * x
+        patternDict[(y, 0, x, x, 0, 0, y)] = 50 * x
+        patternDict[(y, 0, 0, x, x, 0, y)] = 50 * x
+        # dead_2
+        patternDict[(y, x, x, y)] = -50 * x
+        x += 2
+    return patternDict
+
+
+
+##### Zobrist Hashing #####
+def init_zobrist():
+    zTable = [[[random.randrange(2**64) for _ in range(2)] \
+                        for j in range(15)] for i in range(15)] #changed to 32 from 64
+    return zTable
+
+def zobrist_hash(board, zTable):
+    hash = 0
+    for i in range(15):
+        for j in range(15):
+            if board[i][j] != 0:
+                piece = 0 if board[i][j]==1 else 1
+                hash ^= zTable[i][j][piece]
+    return hash
+
+def update_table(table, hash, score, depth):
+    table[hash] = [score, depth]

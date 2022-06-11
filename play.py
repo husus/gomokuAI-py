@@ -35,6 +35,7 @@ if __name__ == '__main__':
         if game.ai.currentState == 0: #if no move has been made yet
             game.drawButtons(button_black, button_white, game.screen)
             game.menuChoice()
+            # pygame.display.update()
             continue
         
         result = game.ai.checkResult()
@@ -58,7 +59,7 @@ if __name__ == '__main__':
                     if event.type == pygame.MOUSEBUTTONDOWN\
                         and pygame.mouse.get_pressed()[0]:
                         mouse_pos = pygame.mouse.get_pos()
-                        human_move = pos_pixel2map(mouse_pos[0], mouse_pos[1])
+                        human_move = utils.pos_pixel2map(mouse_pos[0], mouse_pos[1])
                         move_i = human_move[0]
                         move_j = human_move[1]
                         print(mouse_pos, move_i, move_j)
@@ -73,26 +74,42 @@ if __name__ == '__main__':
                             game.drawPiece(color, move_i, move_j)
                             result =  game.ai.checkResult()
                             game.ai.currentState *= -1
-                    else:
-                        continue
+                else:
+                    continue
             
-        if result == 0:
-            print("it's a tie!")
-            game.draw_result(tie=True)
-            end = True
-
-        if result != None:
-            game.drawResult()
-            game.ai.drawBoard()
+        # if result == 0:
+        #     print("it's a tie!")
+        #     game.drawResult(tie=True)
+        #     end = True
+        
+        pygame.display.flip()
+        print('result before: ', game.ai.currentState)
+        game.ai.currentState *= -1
+        print('result after: ', game.ai.currentState)
+        last_screen = game.screen.copy()
+        game.screen.blit(last_screen, (0,0))
+        while result != None:
+            if result == 0:
+                print("it's a tie!")
+                game.drawResult(tie=True)
+            else:
+                game.drawResult()
+            # game.ai.drawBoard()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                 elif event.type == pygame.MOUSEBUTTONDOWN\
                     and pygame.mouse.get_pressed()[0]:
                     mouse_pos = pygame.mouse.get_pos()
-                    game.restartChoice(mouse_pos)
+                    choice = game.restartChoice(mouse_pos)
+                    print(choice)
+                    if not choice:
+                        run = False
+                    else:
+                        run = True
+                        print('YES')
 
-            end = True
+            # end = True
 
         # if end:
         #     pass

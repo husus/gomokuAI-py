@@ -32,6 +32,3 @@ class Button():
         self.update(surface)
         self.changeColor(pygame.mouse.get_pos())
         pygame.display.update()
-        
-
-
