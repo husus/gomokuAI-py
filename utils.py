@@ -1,4 +1,5 @@
 import random
+import uuid
 
 ##### For managing the interface #####
 SIZE = 540 #size of the board image
@@ -120,18 +121,18 @@ def create_pattern_dict():
 
 ##### Zobrist Hashing #####
 def init_zobrist():
-    zTable = [[[random.randrange(2**64) for _ in range(2)] \
+    zTable = [[[uuid.uuid4().int  for _ in range(2)] \
                         for j in range(15)] for i in range(15)] #changed to 32 from 64
     return zTable
 
-def zobrist_hash(board, zTable):
-    hash = 0
-    for i in range(15):
-        for j in range(15):
-            if board[i][j] != 0:
-                piece = 0 if board[i][j]==1 else 1
-                hash ^= zTable[i][j][piece]
-    return hash
+# def zobrist_hash(i, j, zTable):
+#     # hash = 0
+#     # for i in range(15):
+#     #     for j in range(15):
+#     #         if board[i][j] != 0:
+#     #             piece = 0 if board[i][j]==1 else 1
+#     h ^= zTable[i][j][piece]
+    return h
 
-def update_table(table, hash, score, depth):
+def update_TTable(table, hash, score, depth):
     table[hash] = [score, depth]

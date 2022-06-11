@@ -43,6 +43,7 @@ if __name__ == '__main__':
         while result is None and game.ai.currentState!=0:
             turn = game.ai.currentState
             color = game.colorState[turn]
+            game.ai.updateBound(game.ai.currentI, game.ai.currentJ, game.ai.nextBound)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -50,6 +51,7 @@ if __name__ == '__main__':
                 if turn == 1:
                     move_i, move_j = gomoku.ai_move(game.ai)
                     game.ai.setState(move_i, move_j, turn)
+                    game.ai.rollingHash ^= game.ai.zobristTable[move_i][move_j][0]
                     # ai.currentI, ai.currentJ = move_i, move_j
                     game.ai.emptyCells -= 1
                     game.drawPiece(color, move_i, move_j)
@@ -71,6 +73,7 @@ if __name__ == '__main__':
                             # ai.nextBound = bound
                             game.ai.currentI, game.ai.currentJ = move_i, move_j
                             game.ai.setState(move_i, move_j, turn)
+                            game.ai.rollingHash ^= game.ai.zobristTable[move_i][move_j][1]
                             game.ai.emptyCells -= 1
                             game.drawPiece(color, move_i, move_j)
                             result =  game.ai.checkResult()

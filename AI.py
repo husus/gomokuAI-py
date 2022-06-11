@@ -14,13 +14,15 @@ class GomokuAI():
         self.boardMap = [[0 for j in range(N)] for i in range(N)]
         self.currentI = -1
         self.currentJ = -1
-        self.currentState = 0
+        self.currentState = 0 #turn
+        self.lastPlayed = 0
         self.boardValue = 0 #board value
         self.nextBound = {}
         self.emptyCells = N*N
         self.patternDict = utils.create_pattern_dict() #from evaluation.py
 
         self.zobristTable = utils.init_zobrist()
+        self.rollingHash = 0
         self.TTable = {}
 
     # Draw board in string format
@@ -63,7 +65,7 @@ class GomokuAI():
         '''
         assert state in (-1,0,1), 'The state inserted is not -1, 0 or 1'
         self.boardMap[i][j] = state
-        self.currentState = state
+        self.lastPlayed = state
 
 
     def countDirection(self, i, j, xdir, ydir, state):
@@ -220,7 +222,8 @@ class GomokuAI():
         if depth <= 0 or (self.checkResult() != None): #or end game
             return  board_value #value of current position
 
-        hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+        # hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+        
         #Suppose TTable of the format --> {hash: [score, depth]}
         if hash in self.TTable and self.TTable[hash][1] >= depth:
             return self.TTable[hash][0] #return board value/ or move, stored in ttable
@@ -236,30 +239,39 @@ class GomokuAI():
                 # and evaluate the position if making the move
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
+                
                 self.boardMap[i][j] = 1
-                hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+                ### Update hash xor ztable[i][j][0]
+                self.rollingHash ^= self.zobristTable[i][j][0]
+
+                ### hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+
                 # update bound based on the new move (i,j)
                 self.updateBound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, False)
-                if eval > max_val:
-                    # reset max value to eval and set next move and next value according to current checked position
-                    max_val = eval
-                    if depth == self.depth: # and self.is_valid(i,j):
-                        self.currentI = i
-                        self.currentJ = j
-                        self.boardValue = eval #changed from new_val
-                        self.nextBound = new_bound
+                max_val = max(eval, max_val)
+                if depth == self.depth: # and self.is_valid(i,j):
+                    self.currentI = i
+                    self.currentJ = j
+                    self.boardValue = eval #changed from new_val
+                    self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
-                utils.update_table(self.TTable, hash, eval, depth) #changed eval from max_val
+                # utils.update_table(self.TTable, hash, eval, depth) #changed eval from max_val
 
                 self.boardMap[i][j] = 0 #undoing the move
-
+                ### Update hash xor ztable[i][j][0] (undo)
+                self.rollingHash ^= self.zobristTable[i][j][0]
+                
+                # del new_bound
                 if beta <= alpha:
                     self.TTable.pop(hash, None)
                     break
-            
+
+            ## update ttable: hash, maxval, depth
+            utils.update_TTable(self.TTable, hash, max_val, depth)
+
             return max_val
 
         else:
@@ -270,26 +282,33 @@ class GomokuAI():
                 i, j = child[0], child[1]
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
+
                 self.boardMap[i][j] = -1 #human
-                hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+                ## hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
+                self.rollingHash ^= self.zobristTable[i][j][1]
+
                 self.updateBound(i, j, new_bound)
                 eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, True)
-                if eval < min_val:
-                    min_val = eval
-                    if depth == self.depth: # and self.is_valid(i,j):
-                        self.currentI = i 
-                        self.currentJ = j
-                        self.boardValue = eval #changed from new_val
-                        self.nextBound = new_bound
+                min_val = min(eval, min_val)
+                if depth == self.depth: # and self.is_valid(i,j):
+                    self.currentI = i 
+                    self.currentJ = j
+                    self.boardValue = eval #changed from new_val
+                    self.nextBound = new_bound
         
                 beta = min(beta, eval)
-                utils.update_table(self.TTable, hash, eval, depth) #changed eval from min_val
-
+                
                 self.boardMap[i][j] = 0 #undoing the move
+                ### Update hash xor ztable[i][j][0] (undo)
+                self.rollingHash ^= self.zobristTable[i][j][0]
 
+                # del new_bound
                 if beta <= alpha:
                     self.TTable.pop(hash, None)
                     break
+
+            ## update ttable: hash, minval, depth
+            utils.update_TTable(self.TTable, hash, min_val, depth)
 
             return min_val
 
@@ -298,9 +317,9 @@ class GomokuAI():
         self.setState(self.currentI, self.currentJ, 1)
 
     def checkResult(self):
-        if self.isFive(self.currentI, self.currentJ, self.currentState) \
-            and self.currentState in (-1, 1):
-            return self.currentState
+        if self.isFive(self.currentI, self.currentJ, self.lastPlayed) \
+            and self.lastPlayed in (-1, 1):
+            return self.lastPlayed
         elif self.emptyCells <= 0:
             # tie
             return 0
