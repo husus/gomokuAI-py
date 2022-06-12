@@ -37,7 +37,7 @@ class GameUI(object):
         pygame.display.update()
 
     def drawMenu(self): 
-        menu_board = pygame.transform.scale(self.menuBoard, (350,100))
+        menu_board = pygame.transform.scale(self.menuBoard, (350,120))
         menu_board_rect = menu_board.get_rect(center = self.screen.get_rect().center)
 
         menu_font = pygame.font.SysFont("arial", 22)
@@ -45,34 +45,26 @@ class GameUI(object):
         menu_board.blit(menu_text, (50,25))
         self.screen.blit(menu_board, menu_board_rect)
 
-        # button_surface = pygame.transform.scale(self.buttonSurf, (110, 60)) 
-        global button_black, button_white   
-        button_black = Button(self.buttonSurf, 200, 300, "BLACK", menu_font)
-        button_white = Button(self.buttonSurf, 340, 300, "WHITE", menu_font)
-        # button_black.draw(self.screen)
-        # button_white.draw(self.screen)
-
         pygame.display.update()
     
     def drawButtons(self, button1, button2, surface):
         button1.draw(surface)
         button2.draw(surface)
+        pygame.display.update()
+        
 
-    def checkColorChoice(self, pos):
+    def checkColorChoice(self, button_black, button_white, pos):
         if button_black.rect.collidepoint(pos):
             self.colorState[-1] = 'black'
             self.colorState[1] = 'white'
             self.ai.currentState = -1
-            self.turn = -1
 
         elif button_white.rect.collidepoint(pos):
             self.colorState[-1] = 'white'
             self.colorState[1] = 'black'
             self.ai.currentState = 1
-            self.turn = 1
 
     def drawPiece(self, state, i, j):
-        
         x, y = self.mapping[(i,j)]
         x = x - PIECE/2
         y = y - PIECE/2
@@ -120,26 +112,18 @@ class GameUI(object):
         (x3, y3) = (width//2 - restart_size[0]//2, height//2) #- restart_size[1]//2)
         menu_board.blit(render_restart, (x3, y3))
 
-        # button_surface = pygame.transform.scale(self.buttonSurf, (90, 50))
-        (x4, y4) = (width * 0.25 + 15, height * 0.75)
-        (x5, y5) = (width * 0.75 - 15, height * 0.75)
-        global yes_button, no_button
-        # TODO: check which button surface suits the restart board
-        yes_button = Button(self.buttonSurf, x4, y4, "YES", restart_font)
-        no_button = Button(self.buttonSurf, x5, y5, "NO", restart_font)
-        self.drawButtons(yes_button, no_button, menu_board)
-
         self.screen.blit(menu_board, (SIZE//2 - width//2, MARGIN//2))
         pygame.display.update()
 
-    def menuChoice(self):
+    ### maybe to be removed
+    def menuChoice(self, button_black, button_white):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             elif event.type == pygame.MOUSEBUTTONDOWN \
                     and pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                self.checkColorChoice(pos)
+                self.checkColorChoice(pos, button_black, button_white)
                 self.screen.blit(self.board, (0,0))
                 pygame.display.update()
                 if self.ai.currentState == 1:
@@ -149,6 +133,22 @@ class GameUI(object):
                     self.ai.currentState *= -1
     #             print(self.colorState)
     #     self.firstMove()
+
+    ### maybe to be removed
+    def restartChoice(self, yes_button, no_button, pos):
+        # for event in pygame.event.get():
+        #     if event.type == pygame.MOUSEBUTTONDOWN \
+        #         and pygame.mouse.get_pressed()[0]:
+        # pos = pygame.mouse.get_pos()
+        if yes_button.rect.collidepoint(pos):
+            # print('yes')
+            return True
+        if no_button.rect.collidepoint(pos):
+            # print('no')
+            return False
+        else:
+            return 'pos: ', pos
+
 
     # def firstMove(self):
     #     for event in pygame.event.get():
@@ -179,20 +179,3 @@ class GameUI(object):
         
 
         # self.ai.currentState *= -1
-
-    def restartChoice(self, pos):
-        # for event in pygame.event.get():
-        #     if event.type == pygame.MOUSEBUTTONDOWN \
-        #         and pygame.mouse.get_pressed()[0]:
-        # pos = pygame.mouse.get_pos()
-        if yes_button.rect.collidepoint(pos):
-            # print('yes')
-            return True
-        if no_button.rect.collidepoint(pos):
-            # print('no')
-            return False
-        else:
-            return 'pos: ', pos
-
-    def changeState(self):
-        pass

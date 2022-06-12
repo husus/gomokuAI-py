@@ -215,19 +215,17 @@ class GomokuAI():
             self.boardMap[new_i][new_j] = 0
         return board_value + value_after - value_before
 
-    # def updateTTable(self, hash, score, depth):
-    #     self.TTable.update({hash: [score, depth]})
-
     def alphaBetaPruning(self, depth, board_value, bound, alpha, beta, maximizingPlayer):
+        # print(self.currentI, self.currentJ)
         if depth <= 0 or (self.checkResult() != None): #or end game
             return  board_value #value of current position
 
         # hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
         
         #Suppose TTable of the format --> {hash: [score, depth]}
-        if hash in self.TTable and self.TTable[hash][1] >= depth:
-            return self.TTable[hash][0] #return board value/ or move, stored in ttable
-
+        if self.rollingHash in self.TTable and self.TTable[self.rollingHash][1] >= depth:
+            return self.TTable[self.rollingHash][0] #return board value/ or move, stored in ttable
+        
         # the maximizing player is AI
         if maximizingPlayer:
             # initializing max value
@@ -241,21 +239,19 @@ class GomokuAI():
                 new_val = self.evaluate(i, j, board_value, 1, new_bound)
                 
                 self.boardMap[i][j] = 1
-                ### Update hash xor ztable[i][j][0]
                 self.rollingHash ^= self.zobristTable[i][j][0]
-
-                ### hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
 
                 # update bound based on the new move (i,j)
                 self.updateBound(i, j, new_bound) 
                 # evaluate position going now at depth-1 when it's the opponent's turn
                 eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, False)
-                max_val = max(eval, max_val)
-                if depth == self.depth: # and self.is_valid(i,j):
-                    self.currentI = i
-                    self.currentJ = j
-                    self.boardValue = eval #changed from new_val
-                    self.nextBound = new_bound
+                if eval > max_val:
+                    max_val = eval
+                    if depth == self.depth: # and self.is_valid(i,j):
+                        self.currentI = i
+                        self.currentJ = j
+                        self.boardValue = eval #changed from new_val
+                        self.nextBound = new_bound
 
                 alpha = max(alpha, eval)
                 # utils.update_table(self.TTable, hash, eval, depth) #changed eval from max_val
@@ -264,13 +260,12 @@ class GomokuAI():
                 ### Update hash xor ztable[i][j][0] (undo)
                 self.rollingHash ^= self.zobristTable[i][j][0]
                 
-                # del new_bound
+                del new_bound
                 if beta <= alpha:
-                    self.TTable.pop(hash, None)
                     break
 
             ## update ttable: hash, maxval, depth
-            utils.update_TTable(self.TTable, hash, max_val, depth)
+            utils.update_TTable(self.TTable, self.rollingHash, max_val, depth)
 
             return max_val
 
@@ -280,35 +275,34 @@ class GomokuAI():
             # look through the child nodes using function in board.py
             for child in self.childNodes(bound):
                 i, j = child[0], child[1]
+                # print('min: ',i,j)
                 new_bound = dict(bound)
                 new_val = self.evaluate(i, j, board_value, -1, new_bound)
 
                 self.boardMap[i][j] = -1 #human
-                ## hash = utils.zobrist_hash(self.boardMap, self.zobristTable)
                 self.rollingHash ^= self.zobristTable[i][j][1]
 
                 self.updateBound(i, j, new_bound)
                 eval = self.alphaBetaPruning(depth-1, new_val, new_bound, alpha, beta, True)
-                min_val = min(eval, min_val)
-                if depth == self.depth: # and self.is_valid(i,j):
-                    self.currentI = i 
-                    self.currentJ = j
-                    self.boardValue = eval #changed from new_val
-                    self.nextBound = new_bound
+                if eval < min_val:
+                    min_val = eval
+                    if depth == self.depth: 
+                        self.currentI = i 
+                        self.currentJ = j
+                        self.boardValue = eval #changed from new_val
+                        self.nextBound = new_bound
         
                 beta = min(beta, eval)
                 
                 self.boardMap[i][j] = 0 #undoing the move
-                ### Update hash xor ztable[i][j][0] (undo)
                 self.rollingHash ^= self.zobristTable[i][j][0]
 
-                # del new_bound
+                del new_bound
                 if beta <= alpha:
-                    self.TTable.pop(hash, None)
                     break
 
             ## update ttable: hash, minval, depth
-            utils.update_TTable(self.TTable, hash, min_val, depth)
+            # utils.update_TTable(self.TTable, hash, min_val, depth)
 
             return min_val
 

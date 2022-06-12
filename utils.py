@@ -125,14 +125,5 @@ def init_zobrist():
                         for j in range(15)] for i in range(15)] #changed to 32 from 64
     return zTable
 
-# def zobrist_hash(i, j, zTable):
-#     # hash = 0
-#     # for i in range(15):
-#     #     for j in range(15):
-#     #         if board[i][j] != 0:
-#     #             piece = 0 if board[i][j]==1 else 1
-#     h ^= zTable[i][j][piece]
-    return h
-
 def update_TTable(table, hash, score, depth):
     table[hash] = [score, depth]

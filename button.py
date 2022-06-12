@@ -3,13 +3,13 @@ import pygame
 pygame.init()
 
 class Button():
-    def __init__(self, image, x_pos, y_pos, text_input, button_font):
+    def __init__(self, image, x_pos, y_pos, text_input, font_size):
         self.image = image
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.text_input = text_input
-        self.button_font = button_font
+        self.button_font = pygame.font.SysFont("arial", font_size)
         self.text = self.button_font.render(self.text_input, True, "white")
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
