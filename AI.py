@@ -1,25 +1,23 @@
-from evaluation import *
-import utils
 import math
 import sys
+import utils
+
 sys.setrecursionlimit(1500)
 
 N = 15
-# TTABLE = {}
 
 class GomokuAI():
-    def __init__(self, depth):
-        self.depth = depth   
-        # self.boardMap = [[BoardState.EMPTY.name for j in range(N)] for i in range(N)]
+    def __init__(self, depth=3):
+        self.depth = depth #default depth set to 3
         self.boardMap = [[0 for j in range(N)] for i in range(N)]
         self.currentI = -1
         self.currentJ = -1
-        self.currentState = 0 #turn
+        self.nextBound = {} #to store possible moves to be checked (i,j)
+        self.boardValue = 0 
+
+        self.turn = 0 
         self.lastPlayed = 0
-        self.boardValue = 0 #board value
-        self.nextBound = {}
-        self.emptyCells = N*N
-        self.patternDict = utils.create_pattern_dict() #from evaluation.py
+        self.patternDict = utils.create_pattern_dict()
 
         self.zobristTable = utils.init_zobrist()
         self.rollingHash = 0

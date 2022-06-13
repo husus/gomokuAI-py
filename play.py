@@ -12,7 +12,7 @@ import pygame
 
 pygame.init()
 
-def startMenu():
+def startGame():
     pygame.init()
     ai = GomokuAI(3)
     game = GameUI(ai)
@@ -43,28 +43,58 @@ def startMenu():
                 main(ai, game)
 
                 if game.ai.checkResult() != None:
+                    last_screen = game.screen.copy()
+                    game.screen.blit(last_screen, (0,0))
+                    # endMenu(game, last_screen)
                     game.drawResult()
                     yes_button = Button(game.buttonSurf, 200, 155, "YES", 18)
                     no_button = Button(game.buttonSurf, 350, 155, "NO", 18)
                     game.drawButtons(yes_button, no_button, game.screen)
+                    pygame.display.update()
                     mouse_pos = pygame.mouse.get_pos()
                     if yes_button.rect.collidepoint(mouse_pos):
                         print('Selected YES')
-                        startMenu()
+                        game.screen.blit(game.board, (0,0))
+                        pygame.display.update()
+                        startGame()
                     if no_button.rect.collidepoint(mouse_pos):
+                        print('Selected NO')
                         pygame.quit()
-
-            # if event.type == pygame.MOUSEMOTION:
-            #     button_black.changeColor(pygame.mouse.get_pos())
-            #     button_white.changeColor(pygame.mouse.get_pos())
 
     print('Out while loop')
     pygame.quit()
 
-def main(ai, game):
-    # game.screen.blit(game.board, (0,0))
-    # pygame.display.update()
+def endMenu(game, last_screen):
+    pygame.init()
+    game.screen.blit(last_screen, (0,0))
+    pygame.display.update()
+    run = True
+    while run:
+        for event in pygame.event.get():
+            game.drawResult()
+            yes_button = Button(game.buttonSurf, 200, 155, "YES", 18)
+            no_button = Button(game.buttonSurf, 350, 155, "NO", 18)
+            game.drawButtons(yes_button, no_button, game.screen)
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN\
+                    and pygame.mouse.get_pressed()[0]:
+                mouse_pos = pygame.mouse.get_pos()
+                if yes_button.rect.collidepoint(mouse_pos):
+                    print('Selected YES')
+                    game.screen.blit(game.board, (0,0))
+                    pygame.display.update()
+                    startGame()
+                if no_button.rect.collidepoint(mouse_pos):
+                    print('Selected NO')
+                    run = False
+    pygame.quit()
+    
 
+
+
+def main(ai, game):
+    pygame.init()
     end = False
     result = game.ai.checkResult()
     while not end:
@@ -111,4 +141,4 @@ def main(ai, game):
 
 
 if __name__ == '__main__':
-    startMenu()
+    startGame()

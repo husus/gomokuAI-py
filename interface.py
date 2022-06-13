@@ -57,12 +57,12 @@ class GameUI(object):
         if button_black.rect.collidepoint(pos):
             self.colorState[-1] = 'black'
             self.colorState[1] = 'white'
-            self.ai.currentState = -1
+            self.ai.turn = -1
 
         elif button_white.rect.collidepoint(pos):
             self.colorState[-1] = 'white'
             self.colorState[1] = 'black'
-            self.ai.currentState = 1
+            self.ai.turn = 1
 
     def drawPiece(self, state, i, j):
         x, y = self.mapping[(i,j)]
@@ -130,7 +130,7 @@ class GameUI(object):
                     # set the first move of the AI at the center
                     self.drawPiece('black', 7, 7)
                     pygame.display.update()
-                    self.ai.currentState *= -1
+                    self.ai.turn *= -1
     #             print(self.colorState)
     #     self.firstMove()
 
