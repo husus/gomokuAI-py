@@ -2,5 +2,6 @@ __pycache__/
 testing_button.py
 testing_algo.py
 testing_ui.py
+performance_eval.py
 TTable.py
 nohup.out
