@@ -1,8 +1,6 @@
 __pycache__/
 testing_button.py
-assets/button2.png 
-assets/button3.png 
 testing_algo.py
 testing_ui.py
-evaluation.py
 TTable.py
+nohup.out
