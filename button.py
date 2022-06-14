@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 
-# A class for the interface buttons
+# A class for the interface menu buttons
 class Button():
     def __init__(self, image, x_pos, y_pos, text_input, font_size):
         self.image = image
