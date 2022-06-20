@@ -1,7 +1,7 @@
 import pygame
 import os
 # from AI import *
-from button import *
+from gui.button import *
 import utils
 
 

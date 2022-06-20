@@ -1,4 +1,4 @@
-from AI import *
+from source.AI import *
 import math
 import time
 from copy import deepcopy
@@ -12,7 +12,6 @@ moves_list = [  (7,7), (8,8),\
                 (10,6), (9,6),\
                 (9,5), (8,5),\
                 (10,7), (8,10)
-                # (10,4), (11,3)
                 ]
 
 #initialized GomokuAI object in order to create a board
@@ -25,15 +24,13 @@ def board_to_eval(ai, moves):
     board_value = 0
 
     for m in moves:
-        bound = ai.nextBound
         turn = ai.currentState
 
-        ai.boardValue = ai.evaluate(m[0], m[1], board_value, -1, bound)
+        ai.boardValue = ai.evaluate(m[0], m[1], board_value, -1, ai.nextBound)
         ai.setState(m[0], m[1], turn)
         ai.currentI, ai.currentJ = m[0], m[1]
-        ai.updateBound(m[0], m[1], bound)
+        ai.updateBound(m[0], m[1], ai.nextBound)
         ai.emptyCells -= 1
-        # ai.drawBoard()
         ai.currentState *= -1
 
 def ai_runtime(ai):
@@ -64,3 +61,17 @@ if __name__ == '__main__':
     df.to_csv('performance_eval.csv')
     print(runtime, moves_chosen)
 
+
+##################################################
+
+import matplotlib.pyplot as plt
+
+runtime = [0.24334406852722168, 1.647745132446289, 24.568960189819336,\
+            247.5137436389923, 2886.513329267502, 14186.450731992722]
+
+depths = [i for i in range(1,7)]
+
+plt.plot(depths, runtime)
+plt.xlabel('Depth')
+plt.ylabel('Time (s)')
+plt.show()

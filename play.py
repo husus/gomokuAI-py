@@ -1,8 +1,8 @@
-from interface import *
-from AI import *
-from button import Button
+from gui.interface import *
+from source.AI import *
+from gui.button import Button
 import utils
-import gomoku
+import source.gomoku as gomoku
 import pygame
 
 # Game initializer function
@@ -61,6 +61,7 @@ def startGame():
                         # Restart the game
                         game.screen.blit(game.board, (0,0))
                         pygame.display.update()
+                        game.ai.turn = 0
                         startGame()
                     if no_button.rect.collidepoint(mouse_pos):
                         # End the game

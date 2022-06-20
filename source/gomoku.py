@@ -1,8 +1,8 @@
 import math
 import time
 import pygame
-from AI import *
-from interface import *
+from source.AI import *
+from gui.interface import *
 import utils 
 
 pygame.init()
