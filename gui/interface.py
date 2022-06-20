@@ -1,8 +1,7 @@
 import pygame
 import os
-# from AI import *
 from gui.button import *
-import utils
+import source.utils as utils
 
 
 SIZE = 540 #size of the board image

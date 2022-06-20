@@ -3,7 +3,7 @@ import time
 import pygame
 from source.AI import *
 from gui.interface import *
-import utils 
+import source.utils as utils 
 
 pygame.init()
 

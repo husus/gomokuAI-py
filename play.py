@@ -1,7 +1,7 @@
 from gui.interface import *
 from source.AI import *
 from gui.button import Button
-import utils
+import source.utils as utils
 import source.gomoku as gomoku
 import pygame
 
